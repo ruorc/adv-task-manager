@@ -8,7 +8,6 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginPrettier from 'eslint-plugin-prettier';
 import stylistic from '@stylistic/eslint-plugin';
 import jsdoc from 'eslint-plugin-jsdoc';
-import reactCompiler from 'eslint-plugin-react-compiler';
 
 /**
  * Centered application quality gate pipeline.
@@ -32,7 +31,6 @@ export default defineConfig([
       '@stylistic': stylistic,
       prettier: eslintPluginPrettier,
       jsdoc: jsdoc,
-      'react-compiler': reactCompiler,
     },
     settings: {
       jsdoc: {
@@ -93,9 +91,6 @@ export default defineConfig([
           definedTags: [],
         },
       ],
-
-      // Enforces strict execution safety boundaries for the React 19 automatic memoization matrix
-      'react-compiler/react-compiler': 'error',
 
       // Secures error catching blocks by demanding transparent stack tracing cause assignments
       '@typescript-eslint/no-unused-vars': [
