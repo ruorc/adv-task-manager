@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Tech-specific cache
+.eslintcache
+.prettiercache
+.parcel-cache
+.turbo/
+.vercel/
+.next/
+.nuxt/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Husky internal directory
+.husky/_
+
+# TypeScript & Linter Cache
+*.tsbuildinfo
+.eslintcache
+.prettiercache
+
+# Environment variables & secrets (CRITICAL)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+/agents.md
+.agents/
