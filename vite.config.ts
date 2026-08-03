@@ -1,44 +1,60 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import { APPLICATION_NAME } from './src/config/appConfig.ts';
 
-export default defineConfig({
-  plugins: [
-    react({
-      // Настройка для корректной работы стилей Emotion
-      jsxImportSource: '@emotion/react',
-    }),
-  ],
-  resolve: {
-    // Включаем нативную поддержку путей из tsconfig.json / tsconfig.app.json
-    tsconfigPaths: true,
-  },
-  build: {
-    cssMinify: true,
-    rollupOptions: {
-      output: {
-        // Заменяем объект на функцию-разделитель
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-router')) {
-              return 'react-vendor';
+export default defineConfig(({ mode }) => {
+  const isProd = mode === 'production';
+
+  return {
+    plugins: [
+      react({
+        // Provides support for Emotion css-props and component names
+        jsxImportSource: '@emotion/react',
+      }),
+      {
+        name: 'html-title-transform',
+        /**
+         * Native Vite HTML transformation hook.
+         * Automatically replaces the placeholder string inside the index.html template during compilation.
+         */
+        transformIndexHtml(html: string): string {
+          return html.replace(
+            /<title>(.*?)<\/title>/,
+            `<title>${APPLICATION_NAME}</title>`
+          );
+        },
+      },
+    ],
+    resolve: {
+      // Enables native support for paths from tsconfig.app.json (Vite 8)
+      tsconfigPaths: true,
+    },
+    build: {
+      sourcemap: !isProd,
+      cssMinify: true,
+      rollupOptions: {
+        output: {
+          // Optimal chunk splitting of heavy libraries for efficient browser caching
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-router')) {
+                return 'react-vendor';
+              }
+
+              if (id.includes('@mui') || id.includes('@emotion')) {
+                return 'mui-vendor';
+              }
+
+              if (id.includes('firebase')) {
+                return 'firebase-vendor';
+              }
+
+              // All other dependencies (tanstack, hook-form, joi, dompurify)
+              return 'utils-vendor';
             }
-
-            if (id.includes('@mui') || id.includes('@emotion')) {
-              return 'mui-vendor';
-            }
-
-            if (id.includes('firebase')) {
-              return 'firebase-vendor';
-            }
-
-            // Все остальные тяжелые утилиты (tanstack, hook-form, joi, dompurify)
-            return 'utils-vendor';
-          }
+          },
         },
       },
     },
-  },
-  server: {
-    open: true,
-  },
+  };
 });
