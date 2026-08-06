@@ -4,16 +4,15 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { useAuthModal } from '@/context/AuthModal';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 
 /**
  * Pure presentation contract representing access controls and session triggers.
  */
 interface AccountActionsProps {
-  /** Explicit verification operator full display name or null for guests */
+  /** Name of the currently authenticated operator, if any */
   readonly authenticatedOperatorName: string | null;
-  /** Callback proxy engineered to cleanly dispatch identity session cancellation requests */
-  readonly onLogoutTrigger: () => void;
+  /** Callback proxy engineered to cleanly dispatch logout requests */
+  readonly onLogout: () => void;
 }
 
 /**
@@ -21,28 +20,24 @@ interface AccountActionsProps {
  */
 export const AccountActions = ({
   authenticatedOperatorName,
-  onLogoutTrigger,
+  onLogout: onLogout,
 }: AccountActionsProps): JSX.Element => {
   const { openLogin } = useAuthModal();
 
   return (
-    <Box
-      sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2.5 } }}
-    >
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
       <Typography
         variant="body2"
         sx={{
+          textAlign: 'center',
           color: 'text.secondary',
           fontWeight: 500,
           display: { xs: 'none', sm: 'block' },
           fontSize: '0.875rem',
         }}
       >
-        {authenticatedOperatorName
-          ? APPLICATION_LOCALE.ui.header.account.welcomeUser(
-              authenticatedOperatorName
-            )
-          : APPLICATION_LOCALE.ui.header.account.welcomeGuest}
+        authenticatedOperatorName ? `Welcome, ${authenticatedOperatorName}` :
+        'Welcome, Guest'
       </Typography>
 
       {authenticatedOperatorName ? (
@@ -50,7 +45,7 @@ export const AccountActions = ({
           variant="outlined"
           color="error"
           size="small"
-          onClick={onLogoutTrigger}
+          onClick={onLogout}
           sx={{
             textTransform: 'none',
             fontWeight: 700,
@@ -63,11 +58,11 @@ export const AccountActions = ({
             },
           }}
         >
-          {APPLICATION_LOCALE.ui.header.account.logout}
+          'Logout'
         </Button>
       ) : (
         <Button
-          variant="contained"
+          variant="outlined"
           color="primary"
           size="small"
           onClick={openLogin}
@@ -75,9 +70,7 @@ export const AccountActions = ({
             textTransform: 'none',
             fontWeight: 700,
             borderRadius: 1.5,
-            boxShadow: 'none',
-            px: { xs: 2, sm: 3 },
-            '&:hover': { boxShadow: 'none' },
+            px: { xs: 2, sm: 2.5 },
             '&.Mui-focusVisible': {
               outline: '2px solid',
               outlineColor: 'primary.main',
@@ -85,7 +78,7 @@ export const AccountActions = ({
             },
           }}
         >
-          {APPLICATION_LOCALE.ui.header.account.login}
+          Login
         </Button>
       )}
     </Box>

@@ -1,69 +1,72 @@
-import { useEffect, useState, type JSX, type ReactNode } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import {
+  useEffect,
+  useState,
+  useMemo,
+  type JSX,
+  type ReactNode,
+  useCallback,
+} from 'react';
 
-import { auth } from '@/firebase/config';
-import { sysLogger } from '@/utils/logger';
-import { firebaseAuthService } from '@/firebase/services/FirebaseAuthService';
 import { AuthContext } from '../context/AuthContext';
 
-import type { AuthContextProps } from '../types/types';
-
-const logger = sysLogger.forModule('AuthProvider');
+import type { AppUser } from '@/context/User/userTypes';
+import type { AuthService } from '@/context/Auth/types/authServiceTypes';
+import type { AuthContextProps } from '../types/authContextTypes';
 
 /**
- * Centralized Infrastructure Provider managing global core firebase authentication session pipelines.
+ * Configuration properties for the generic authentication provider component.
  */
-export const AuthProvider = ({
-  children,
-}: {
+interface GenericAuthProviderProps {
+  /** Concrete implementation of the authentication contract used for session management. */
+  readonly authService: AuthService;
+
+  /** React node hierarchy that requires access to the authentication state context. */
   readonly children: ReactNode;
-}): JSX.Element => {
+}
+
+/**
+ * Centralized context provider that distributes authentication state and session workflows across the application.
+ * Utilizes dependency injection to decouple client components from vendor-specific infrastructure APIs.
+ */
+export const GenericAuthProvider = ({
+  authService,
+  children,
+}: GenericAuthProviderProps): JSX.Element => {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [appUser, setAppUser] = useState<AppUser | null>(null);
 
   useEffect(() => {
-    /**
-     * Establishes a persistent realtime observer channel tracking cloud identity mutations.
-     */
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const unsubscribe = authService.subscribeToAuthChanges((user) => {
+      setAppUser(user);
       setIsInitializing(false);
-
-      if (firebaseUser) {
-        logger.info(
-          `Identity validation verified for core provider: [${firebaseUser.uid}]`
-        );
-      } else {
-        logger.info(
-          'Core identity session context synchronized as guest profile'
-        );
-      }
     });
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [authService]);
 
-  const executeLogoutSequence = async (): Promise<void> => {
+  const executeLogoutSequence = useCallback(async (): Promise<void> => {
     try {
-      await firebaseAuthService.logout();
-    } catch (error) {
-      logger.error(
-        'Security context destruction aborted due to backend transport failure',
-        error
-      );
+      await authService.logout();
+    } catch {
+      // Error handling and logging are delegated to the low-level service implementation.
     }
-  };
+  }, [authService]);
 
-  const value: AuthContextProps = {
-    isAuthenticated: Boolean(user),
-    isInitializing,
-    operatorName: user ? user.displayName || user.email : null,
-    uid: user ? user.uid : null,
-    nativeUser: user,
-    executeLogoutSequence,
-  };
+  const contextValue = useMemo<AuthContextProps>(
+    () => ({
+      isAuthenticated: Boolean(appUser),
+      isInitializing,
+      operatorName: appUser ? appUser.displayName : null,
+      uid: appUser ? appUser.uid : null,
+      user: appUser,
+      executeLogoutSequence,
+    }),
+    [appUser, isInitializing, executeLogoutSequence]
+  );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };

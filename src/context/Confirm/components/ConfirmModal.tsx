@@ -9,8 +9,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
-
 /**
  * Structural communication contract defining data properties required to render the confirmation dialog.
  */
@@ -40,8 +38,8 @@ export const ConfirmModal = ({
   isOpen,
   title,
   description,
-  confirmLabel = APPLICATION_LOCALE.confirmModal.defaultLabels.CONFIRM,
-  cancelLabel = APPLICATION_LOCALE.confirmModal.defaultLabels.CANCEL,
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   onConfirm,
   onClose,
   isDanger = false,
@@ -73,7 +71,7 @@ export const ConfirmModal = ({
       }}
     >
       <IconButton
-        aria-label={APPLICATION_LOCALE.confirmModal.closeModal}
+        aria-label="Close confirmation dialog"
         onClick={onClose}
         size="small"
         sx={{

@@ -1,14 +1,16 @@
 import { type ReactNode } from 'react';
 
+import type { ReadonlyAuthForm } from './authFormTypes';
+
 /**
  * Structural contract defining actionable operations exposed by the identity modal context stream.
  */
 export interface AuthModalContextProps {
-  /** Trigger execution sequence booting the modal structure directly into login status mapping */
+  /** Callback proxy engineered to cleanly dispatch login modal triggers */
   readonly openLogin: () => void;
-  /** Trigger execution sequence booting the modal structure directly into registration status mapping */
+  /** Callback proxy engineered to cleanly dispatch registration modal triggers */
   readonly openRegister: () => void;
-  /** Terminate the active authentication overlay layout status stream */
+  /** Callback proxy engineered to cleanly dispatch authentication modal closure requests */
   readonly closeAuth: () => void;
 }
 
@@ -16,6 +18,11 @@ export interface AuthModalContextProps {
  * Structural communication contract specifying core initialization parameters for the context wrapper.
  */
 export interface AuthModalProviderProps {
-  /** The composite React element node sub-tree clusters nested within the context boundary */
+  /** React node tree to be rendered within the context provider */
   readonly children: ReactNode;
+  /** Callback proxy engineered to cleanly dispatch authentication form submission requests */
+  readonly onSubmitAction: (
+    data: ReadonlyAuthForm,
+    isRegister: boolean
+  ) => Promise<void>;
 }

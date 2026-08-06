@@ -10,8 +10,6 @@ import Zoom from '@mui/material/Zoom';
 import Fab from '@mui/material/Fab';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
-
 /**
  * Structural contract defining anchor tracking nodes for viewport boundary transitions.
  */
@@ -82,7 +80,7 @@ export const ScrollToTop = ({ targetRef }: ScrollToTopProps): JSX.Element => {
         onClick={handleSmoothScrollExecution}
         color="primary"
         size="small"
-        aria-label={APPLICATION_LOCALE.ui.scrollToTopLabel}
+        aria-label="Scroll back to global application navigation apex"
         tabIndex={isAnchorVisible ? 0 : -1}
         {...inertAttributes}
         sx={{

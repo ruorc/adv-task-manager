@@ -1,4 +1,4 @@
-import { type User } from 'firebase/auth';
+import type { AppUser } from '@/context/User';
 
 /**
  * Structural definition contract specifying credentials tokens exposed by the authentication context tree.
@@ -13,7 +13,7 @@ export interface AuthContextProps {
   /** Unique operator identification code assigned to the persistent cloud account node */
   readonly uid: string | null;
   /** Direct access blueprint mapping internal native client instances */
-  readonly nativeUser: User | null;
+  readonly user: AppUser | null;
   /** Dispatches an explicit request to clean cloud token registries and close active sessions */
   readonly executeLogoutSequence: () => Promise<void>;
 }

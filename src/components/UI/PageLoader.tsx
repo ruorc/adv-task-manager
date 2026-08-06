@@ -2,7 +2,6 @@ import { type JSX } from 'react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 /**
  * Universal Shared High-Performance Fullscreen Accessibility Indicator Node.
  * Hardens layout stability during asynchronous thread loading or session token synchronization passes.
@@ -13,7 +12,7 @@ export const PageLoader = (): JSX.Element => {
       role="progressbar"
       aria-busy="true"
       aria-live="assertive"
-      aria-label={APPLICATION_LOCALE.ui.loaderLabel}
+      aria-label="Synchronizing system matrix architecture data, please remain active"
       sx={{
         position: 'fixed',
         inset: 0,

@@ -21,7 +21,6 @@ import { type Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { generateRuntimeId } from '@/utils/crypto';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import {
   SNACK_DISPLAY_DURATION,
   SNACKS,
@@ -202,7 +201,7 @@ export const SnackProvider = ({
 
       <Box
         role="region"
-        aria-label={APPLICATION_LOCALE.snack.accessibility.region}
+        aria-label="System Notifications"
         aria-live="polite"
         sx={notificationsWrapperStyles}
       >
@@ -222,7 +221,7 @@ export const SnackProvider = ({
                 action={
                   <IconButton
                     size="small"
-                    aria-label={APPLICATION_LOCALE.snack.accessibility.dismiss}
+                    aria-label="Dismiss notification"
                     color="inherit"
                     onClick={() => dismissSnack(snack.id)}
                     sx={{

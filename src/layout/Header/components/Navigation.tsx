@@ -1,7 +1,6 @@
 import { type JSX } from 'react';
 import Box from '@mui/material/Box';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { NavigationLinkItem } from './NavigationLinkItem';
 
 import type { NavigationItem } from '@/types/navigation';
@@ -39,7 +38,7 @@ export const Navigation = ({ items }: NavigationProps): JSX.Element => {
   return (
     <Box
       component="nav"
-      aria-label={APPLICATION_LOCALE.ui.header.navigation.accessibility.primary}
+      aria-label="Primary Application Navigation"
       sx={{
         display: 'flex',
         alignItems: 'center',

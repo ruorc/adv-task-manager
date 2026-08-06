@@ -10,8 +10,8 @@ import Button from '@mui/material/Button';
  * Structural contract defining interface configurations for an individual header navigation link element.
  */
 interface NavigationLinkItemProps {
-  /** Primary human-readable navigation label displayed to the operator */
-  readonly displayLabel: string;
+  /** Primary human-readable navigation label or complex rich React node displayed to the operator */
+  readonly displayLabel: ReactNode;
   /** Router-managed abstraction component wrapping the operational navigation target anchor link */
   readonly LinkComponent: ComponentType<{
     /** Explicit render prop function passing router runtime flags to children UI */
@@ -63,13 +63,19 @@ interface NavigationLinkItemProps {
 
 /**
  * Isolated structural view snippet rendering a standardized accessible Material UI routing anchor button.
+ * Intercepts navigation actions when the targeted route matches the current operational path context.
  */
 export const NavigationLinkItem = ({
   displayLabel,
   LinkComponent,
   sharedActionStyles,
 }: NavigationLinkItemProps): JSX.Element => {
+  /**
+   * Interception proxy preventing redundant routing re-triggers and default anchor behaviors
+   * when the navigation item represents the currently active viewport destination.
+   */
   const handleDisabledClickIntercept = (
+    /** Synthetic mouse event object intercepted during click execution passes */
     event: MouseEvent<HTMLButtonElement>
   ): void => {
     event.preventDefault();

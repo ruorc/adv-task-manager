@@ -1,5 +1,4 @@
 import { APPLICATION_NAME } from '@/config/appConfig';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { toSlug } from '@/utils/project';
 
 /**
@@ -35,8 +34,12 @@ export const DEFAULT_THEME: ThemeMode = THEMES.SYSTEM;
  * Public internationalized text token mappings for user-facing design theme options.
  * Binds directly to the centralized application global localization infrastructure.
  */
-export const THEME_LABELS: Record<ThemeMode, string> =
-  APPLICATION_LOCALE.theme.labels;
+export const THEME_LABELS: Record<ThemeMode, string> = {
+  light: 'Light',
+  dark: 'Dark',
+  colorful: 'Colorful',
+  system: 'System',
+};
 
 /**
  * Unique scope identifier used to isolate layout animations for the ThemeSelector.

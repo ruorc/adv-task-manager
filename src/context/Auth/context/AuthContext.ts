@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { AuthContextProps } from '../types/types';
+import type { AuthContextProps } from '../types/authContextTypes';
 
 /**
  * Internal React context token instance orchestrating security transport parameters.

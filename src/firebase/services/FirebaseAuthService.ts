@@ -1,89 +1,214 @@
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile,
   signOut,
+  deleteUser,
+  onAuthStateChanged,
   type UserCredential,
 } from 'firebase/auth';
 
 import { auth } from '@/firebase/config';
 import { sysLogger } from '@/utils/logger';
+import { FIREBASE_AUTH_ERRORS } from '../constants/firebaseConstants';
+import { firestoreUserService } from './FirestoreUserService';
 
-import type { ReadonlyAuthForm } from '@/context/AuthModal/types/authFormTypes';
+import type { ReadonlyAuthForm } from '@/context/AuthModal';
+import type { AuthService } from '@/context/Auth/types/authServiceTypes';
+import type { AppUser } from '@/context/User/userTypes';
+
+const logger = sysLogger.forModule('FirebaseAuthService');
 
 /**
- * Dedicated Firebase Client SDK Identity and Access Control Service.
- * Orchestrates direct web-socket and transport operations through official modular libraries.
+ * Firebase-backed implementation of the authentication service managing user sessions,
+ * credential validation, registration rollbacks, and real-time profile state synchronization.
  */
-export class FirebaseAuthService {
+export class FirebaseAuthService implements AuthService {
   /**
-   * Authenticates an operator using direct cloud credential validation channels.
+   * Authenticates an existing user using email and password credentials.
    */
   public async login(credentials: ReadonlyAuthForm): Promise<UserCredential> {
     try {
-      const userCredential = await signInWithEmailAndPassword(
+      return await signInWithEmailAndPassword(
         auth,
         credentials.email.trim(),
         credentials.password
       );
-
-      return userCredential;
     } catch (error) {
-      sysLogger.error(
+      logger.error(
         'Native firebase client SDK login processing failure',
         error
       );
 
-      throw error;
+      throw this.handleAuthError(error);
     }
   }
 
   /**
-   * Establishes a new cloud user profile and appends structural metadata mapping to display metrics.
+   * Registers a new user account, enforces strict non-empty first and last names,
+   * constructs the display name strictly as the combination of first and last names,
+   * provisions a synchronized profile document in Firestore, and rolls back on failure.
    */
   public async register(
     registrationData: ReadonlyAuthForm
   ): Promise<UserCredential> {
+    const email = registrationData.email.trim();
+    const firstName = registrationData.firstName?.trim() ?? '';
+    const lastName = registrationData.lastName?.trim() ?? '';
+
+    if (!firstName) {
+      throw new Error('First name cannot be empty.');
+    }
+
+    if (!lastName) {
+      throw new Error('Last name cannot be empty.');
+    }
+
+    const displayName = `${firstName} ${lastName}`;
+
+    let userCredential: UserCredential | null = null;
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      userCredential = await createUserWithEmailAndPassword(
         auth,
-        registrationData.email.trim(),
+        email,
         registrationData.password
       );
 
-      const fullOperatorName = `${registrationData.firstName!.trim()} ${registrationData.lastName!.trim()}`;
+      const newUser: AppUser = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email ?? email,
+        firstName,
+        lastName,
+        displayName,
+        role: 'user',
+      };
 
-      await updateProfile(userCredential.user, {
-        displayName: fullOperatorName,
-      });
+      await firestoreUserService.saveUserProfile(newUser);
 
       return userCredential;
     } catch (error) {
-      sysLogger.error(
-        'Native firebase client SDK profile creation rejected',
+      logger.error(
+        'Native firebase client SDK register and sync rejected',
         error
       );
 
-      throw error;
+      if (userCredential?.user) {
+        try {
+          await deleteUser(userCredential.user);
+        } catch (cleanupError) {
+          logger.error(
+            'Failed to roll back Auth user after Firestore failure',
+            cleanupError
+          );
+        }
+      }
+
+      throw this.handleAuthError(error);
     }
   }
 
   /**
-   * Terminates the active secure session and dispatches state resets.
+   * Terminates the active user session securely.
    */
   public async logout(): Promise<void> {
     try {
       await signOut(auth);
     } catch (error) {
-      sysLogger.error(
+      logger.error(
         'Native firebase client SDK explicit session termination failed',
         error
       );
 
-      throw error;
+      throw this.handleAuthError(error);
+    }
+  }
+
+  /**
+   * Establishes a real-time subscription to authentication state changes
+   * and synchronizes the active user profile stream from Firestore.
+   */
+  public subscribeToAuthChanges(
+    onUserChanged: (user: AppUser | null) => void
+  ): () => void {
+    let unsubscribeFromFirestore: (() => void) | null = null;
+
+    const unsubscribeFromAuth = onAuthStateChanged(
+      auth,
+      async (firebaseUser) => {
+        if (unsubscribeFromFirestore) {
+          unsubscribeFromFirestore();
+          unsubscribeFromFirestore = null;
+        }
+
+        if (!firebaseUser) {
+          onUserChanged(null);
+
+          return;
+        }
+
+        try {
+          const userProfile = await firestoreUserService.getUserProfile(
+            firebaseUser.uid
+          );
+
+          if (userProfile) {
+            onUserChanged(userProfile);
+          } else {
+            onUserChanged(null);
+          }
+        } catch (error) {
+          logger.error(
+            `Service framework failed to sync database profile for [${firebaseUser.uid}]`,
+            error
+          );
+
+          onUserChanged(null);
+        }
+      }
+    );
+
+    return () => {
+      unsubscribeFromAuth();
+
+      if (unsubscribeFromFirestore) {
+        unsubscribeFromFirestore();
+      }
+    };
+  }
+
+  /**
+   * Maps raw Firebase authentication errors to clean application exceptions.
+   */
+  private handleAuthError(error: unknown): Error {
+    const nativeError = error as Error & { readonly code?: string };
+
+    if (!nativeError.code) {
+      return new Error('An unexpected authentication error occurred.', {
+        cause: error,
+      });
+    }
+
+    switch (nativeError.code) {
+      case FIREBASE_AUTH_ERRORS.EMAIL_IN_USE:
+        return new Error(
+          'The provided email address is already in use by another account.',
+          {
+            cause: error,
+          }
+        );
+      case FIREBASE_AUTH_ERRORS.INVALID_CREDENTIALS:
+        return new Error('Invalid email or password credentials provided.', {
+          cause: error,
+        });
+      default:
+        return new Error('An unexpected authentication error occurred.', {
+          cause: error,
+        });
     }
   }
 }
 
-/** Centralized single-instance operation orchestrator binding native firebase authorization */
+/**
+ * Singleton instance of the Firebase authentication service.
+ */
 export const firebaseAuthService = new FirebaseAuthService();

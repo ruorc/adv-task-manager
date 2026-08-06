@@ -20,6 +20,8 @@ export const Footer = (): JSX.Element => {
     <Box
       component="footer"
       sx={{
+        position: 'relative',
+        zIndex: 10,
         width: '100%',
         py: { xs: 2, sm: 2.5 },
         px: { xs: 2, sm: 3 },

@@ -5,6 +5,7 @@ import type {
   AuthModalContextProps,
   AuthModalProviderProps,
 } from './types/authContextTypes';
+import type { ReadonlyAuthForm } from './types/authFormTypes';
 
 /**
  * Public structural core entry contract exporting orchestrated authentication components,
@@ -22,4 +23,6 @@ export type {
   AuthModalContextProps,
   /** Structural communication contract specifying core initialization parameters for the context wrapper */
   AuthModalProviderProps,
+  /** Structural blueprint enforcing immutable authentication form parameters for login and registration processes */
+  ReadonlyAuthForm,
 };

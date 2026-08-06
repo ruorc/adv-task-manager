@@ -11,7 +11,6 @@ import {
   THEME_LABELS,
   THEME_LAYOUT_ID,
 } from '@/context/Theme/constants/themeConstants';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { ThemeOptionItem } from './ThemeOptionItem';
 
 import type { ThemeMode } from '@/context/Theme';
@@ -23,7 +22,7 @@ interface ThemeSelectorProps {
   /** The compile-time immutable literal identifier representing the currently operational rendering strategy */
   readonly activeThemeMode: ThemeMode;
   /** Explicit dispatcher proxy routing newly selected target theme strategies up to the provider execution pipeline */
-  readonly onThemeChangeAction: (theme: ThemeMode) => void;
+  readonly onThemeChange: (theme: ThemeMode) => void;
 }
 
 const ITEM_TEXT_SLOT_PROPS = {
@@ -81,7 +80,7 @@ const renderActiveThemeIcon = (activeThemeMode: ThemeMode): JSX.Element => {
  */
 export const ThemeSelector = ({
   activeThemeMode,
-  onThemeChangeAction,
+  onThemeChange: onThemeChangeAction,
 }: ThemeSelectorProps): JSX.Element => {
   const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorElement);
@@ -99,9 +98,7 @@ export const ThemeSelector = ({
       <IconButton
         onClick={handleMenuOpenTrigger}
         color="inherit"
-        aria-label={
-          APPLICATION_LOCALE.ui.header.themeSelector.accessibility.openMenu
-        }
+        aria-label="Open visual interface theme configuration menu"
         aria-controls={isMenuOpen ? 'theme-configuration-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={isMenuOpen ? 'true' : undefined}

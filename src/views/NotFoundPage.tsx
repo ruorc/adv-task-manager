@@ -7,7 +7,6 @@ import Zoom from '@mui/material/Zoom';
 import Container from '@mui/material/Container';
 import HomeIcon from '@mui/icons-material/Home';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { ROUTES } from '@/routes';
 import { sysLogger } from '@/utils/logger';
 
@@ -31,9 +30,6 @@ export const NotFoundPage = (): JSX.Element => {
 
   return (
     <Box
-      component="main"
-      id="main-content"
-      tabIndex={-1}
       sx={{
         display: 'flex',
         minHeight: '100vh',
@@ -84,7 +80,7 @@ export const NotFoundPage = (): JSX.Element => {
                 fontSize: { xs: '1.5rem', sm: '2rem' },
               }}
             >
-              {APPLICATION_LOCALE.pages.notFound.title}
+              'Page Not Found'
             </Typography>
 
             <Typography
@@ -96,7 +92,8 @@ export const NotFoundPage = (): JSX.Element => {
                 lineHeight: 1.6,
               }}
             >
-              {APPLICATION_LOCALE.pages.notFound.description}
+              'The page you are looking for might have been removed, had its
+              name changed, or is temporarily unavailable.'
             </Typography>
           </Box>
 
@@ -121,7 +118,7 @@ export const NotFoundPage = (): JSX.Element => {
               },
             }}
           >
-            {APPLICATION_LOCALE.pages.notFound.backHomeButtonLabel}
+            'Back to Dashboard'
           </Button>
         </Box>
       </Container>

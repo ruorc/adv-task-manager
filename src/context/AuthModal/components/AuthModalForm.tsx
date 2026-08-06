@@ -6,40 +6,38 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 
-import { auth } from '@/firebase/config';
 import { sysLogger } from '@/utils/logger/AppLogger';
-import { firebaseAuthService } from '@/firebase/services/FirebaseAuthService';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { AuthTextField } from './AuthTextField';
 import { authSchema } from '../schema/authSchema';
-import {
-  AUTH_MODES,
-  FIREBASE_AUTH_ERRORS,
-  AUTH_TEXTS,
-} from '../constants/authConstants';
+import { AUTH_MODES, AUTH_TEXTS } from '../constants/authModalConstants';
 
 import type { ReadonlyAuthForm, AuthModeType } from '../types/authFormTypes';
 
 /**
- * Structural contract defining configuration settings for the internal authentication form wizard.
+ * Properties required to initialize and manage user authentication form layouts and events.
  */
 interface AuthModalFormProps {
-  /** Reactive status flag holding active workflow visualization metrics */
+  /** The operational layout mode determining which credential fields are visible. */
   readonly currentMode: AuthModeType;
-  /** Explicit callback proxy notification modifier toggling parent layout states */
+  /** Callback executed when switching views between login and registration layouts. */
   readonly onModeToggle: (mode: AuthModeType) => void;
-  /** Explicit completion sequence action callback routing validated application streams back to root contexts */
+  /** Callback executed after successful execution of submission workflows. */
   readonly onFormSuccess: () => void;
+  /** Asynchronous action handling the orchestration of authentication requests using internal form data. */
+  readonly onSubmitAction: (
+    data: ReadonlyAuthForm,
+    isRegister: boolean
+  ) => Promise<void>;
 }
 
 /**
- * Isolated Authentication Form Management Engine. Resolves validations, credential submission streams,
- * and handles localized UI mode toggling independently from the container dialog frames.
+ * A centralized form component handling user validation, layout, and rendering for login and registration processes.
  */
 export const AuthModalForm = ({
   currentMode,
   onModeToggle,
   onFormSuccess,
+  onSubmitAction,
 }: AuthModalFormProps): JSX.Element => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
@@ -61,20 +59,15 @@ export const AuthModalForm = ({
     reset,
     formState: { isSubmitting },
   } = methods;
+
   const isRegisterMode = currentMode === AUTH_MODES.REGISTER;
 
-  /**
-   * Resets local validation parameters and toggles the active identity operational workflow mode.
-   */
   const handleModeToggle = (): void => {
     onModeToggle(isRegisterMode ? AUTH_MODES.LOGIN : AUTH_MODES.REGISTER);
     setSubmissionError(null);
     reset();
   };
 
-  /**
-   * Orchestrates the secure dispatch execution sequence to external identity services.
-   */
   const handleFormSubmit = async (data: ReadonlyAuthForm): Promise<void> => {
     setSubmissionError(null);
 
@@ -85,39 +78,18 @@ export const AuthModalForm = ({
     }
 
     try {
-      if (isRegisterMode) {
-        await firebaseAuthService.register(data);
-
-        if (auth.currentUser) {
-          await auth.currentUser.reload();
-        }
-      } else {
-        await firebaseAuthService.login(data);
-
-        if (auth.currentUser) {
-          await auth.currentUser.reload();
-        }
-      }
-
+      await onSubmitAction(data, isRegisterMode);
       onFormSuccess();
       reset();
     } catch (error) {
-      sysLogger.error(
-        'Firebase cloud identity interaction failure intercepted',
-        error
-      );
+      sysLogger.error('Authentication workflow execution failure', error);
 
-      const nativeError = error as Error & { readonly code?: string };
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(AUTH_TEXTS.ERROR_GENERIC);
 
-      if (nativeError.code === FIREBASE_AUTH_ERRORS.EMAIL_IN_USE) {
-        setSubmissionError(String(AUTH_TEXTS.ERROR_EMAIL_ALLOCATED));
-      } else if (
-        nativeError.code === FIREBASE_AUTH_ERRORS.INVALID_CREDENTIALS
-      ) {
-        setSubmissionError(String(AUTH_TEXTS.ERROR_INVALID_CREDENTIALS));
-      } else {
-        setSubmissionError(String(AUTH_TEXTS.ERROR_GENERIC));
-      }
+      setSubmissionError(message);
     }
   };
 
@@ -127,27 +99,21 @@ export const AuthModalForm = ({
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {isRegisterMode && (
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <AuthTextField
-                name="firstName"
-                label={APPLICATION_LOCALE.auth.fields.firstName}
-                required
-              />
-              <AuthTextField
-                name="lastName"
-                label={APPLICATION_LOCALE.auth.fields.lastName}
-                required
-              />
+              <AuthTextField name="firstName" label="First name" required />
+              <AuthTextField name="lastName" label="Last name" required />
             </Box>
           )}
+
           <AuthTextField
             name="email"
-            label={APPLICATION_LOCALE.auth.fields.email}
+            label="Email address"
             type="email"
             required
           />
+
           <AuthTextField
             name="password"
-            label={APPLICATION_LOCALE.auth.fields.password}
+            label="Secure password"
             type="password"
             required
           />
@@ -155,7 +121,7 @@ export const AuthModalForm = ({
           {isRegisterMode && (
             <AuthTextField
               name="confirmPassword"
-              label={APPLICATION_LOCALE.auth.fields.confirmPassword}
+              label="Confirm password"
               type="password"
               required
             />
@@ -203,10 +169,10 @@ export const AuthModalForm = ({
               <Link
                 component="button"
                 type="button"
+                underline="hover"
                 onClick={handleModeToggle}
                 sx={{
                   fontWeight: 700,
-                  underline: 'hover',
                   textTransform: 'none',
                   fontSize: '0.875rem',
                   verticalAlign: 'baseline',

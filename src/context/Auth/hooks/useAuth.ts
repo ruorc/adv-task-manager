@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { AuthContext } from '../context/AuthContext';
 
-import type { AuthContextProps } from '../types/types';
+import type { AuthContextProps } from '../types/authContextTypes';
 
 /**
  * Standard security interceptor hook extracting active authorization operational vectors.

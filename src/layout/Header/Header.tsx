@@ -1,55 +1,68 @@
 import { type JSX } from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import ButtonBase from '@mui/material/ButtonBase';
 
 import { APPLICATION_NAME } from '@/config/appConfig';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { Navigation } from './components/Navigation';
 import { ThemeSelector } from './components/ThemeSelector';
 import { AccountActions } from './components/AccountActions';
+import { NavigationLinkItem } from './components/NavigationLinkItem';
 
 import type { ThemeMode } from '@/context/Theme';
 import type { NavigationRegistry } from '@/types/navigation';
 
 /**
- * Pure presentation contract representing global header navigation configurations.
+ * Pure presentation contract representing global header navigation configurations
+ * and operational action triggers.
  */
 interface HeaderProps {
-  /** Explicit verification operator full display name or null for guests */
+  /** Explicit verification operator full display name or null for guest sessions */
   readonly authenticatedOperatorName: string | null;
   /** Immutable token representative mapping indicating the active architecture design theme selection */
   readonly activeThemeMode: ThemeMode;
-  /** Flag verifying whether the layout is preparing to render workspace-level sidebar controllers */
-  readonly isSidebarRendered: boolean;
   /** Centralized global application navigation configurations managed by the active router */
   readonly navigationRegistry: NavigationRegistry;
   /** Callback proxy engineered to cleanly dispatch identity session cancellation requests */
-  readonly onLogoutTrigger: () => void;
+  readonly onLogout: () => void;
   /** Multi-mode transition strategy callback updating core design framework properties */
-  readonly onThemeChangeAction: (theme: ThemeMode) => void;
-  /** Functional command trigger shifting navigation responsive side drawers states */
-  readonly onToggleSidebar: () => void;
+  readonly onThemeChange: (theme: ThemeMode) => void;
 }
 
 /**
- * Standard un-fixed system layout banner routing system states, operational metadata,
- * and high-visibility keyboard focus responsive anchor triggers.
+ * Shared presentation styling configuration governing branding logo button elements
+ * within the primary header navigation tier.
+ */
+const LOGO_BUTTON_STYLES = {
+  textTransform: 'none' as const,
+  fontWeight: 600,
+  borderRadius: 1.5,
+  color: 'text.primary',
+  px: { xs: 1, sm: 1.5 },
+  '&.active': {
+    color: 'text.primary',
+    bgcolor: 'transparent',
+  },
+  '&.Mui-focusVisible': {
+    outline: '2px solid',
+    outlineColor: 'primary.main',
+    outlineOffset: 3,
+  },
+};
+
+/**
+ * static system layout banner routing system states, operational metadata,
+ * brand identity vectors, and high-visibility keyboard focus responsive anchor triggers.
  */
 export const Header = ({
   authenticatedOperatorName,
   activeThemeMode,
-  isSidebarRendered,
   navigationRegistry,
-  onLogoutTrigger,
-  onThemeChangeAction,
-  onToggleSidebar,
+  onLogout: onLogout,
+  onThemeChange: onThemeChange,
 }: HeaderProps): JSX.Element => {
   const { rootLink: LogoLinkComponent, links } = navigationRegistry;
 
@@ -59,6 +72,8 @@ export const Header = ({
       elevation={0}
       component="header"
       sx={{
+        top: 0,
+        zIndex: (theme) => theme.zIndex.appBar,
         bgcolor: 'background.paper',
         color: 'text.primary',
         borderBottom: '1px solid',
@@ -74,54 +89,11 @@ export const Header = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {isSidebarRendered && (
-            <IconButton
-              color="inherit"
-              aria-label={
-                APPLICATION_LOCALE.ui.header.accessibility.openSidebar
-              }
-              edge="start"
-              onClick={onToggleSidebar}
-              sx={{ display: { md: 'none' }, mr: 0.5 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-
-          <LogoLinkComponent>
-            {({ isActive }) => (
-              <ButtonBase
-                focusRipple={!isActive}
-                disabled={isActive}
-                aria-label={
-                  isActive
-                    ? undefined
-                    : `${APPLICATION_NAME} - ${APPLICATION_LOCALE.ui.header.accessibility.logoLabel}`
-                }
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  borderRadius: 1.5,
-                  p: 0.5,
-                  transition: 'background-color 0.2s ease',
-                  ...(isActive
-                    ? {
-                        cursor: 'default',
-                        pointerEvents: 'none',
-                      }
-                    : {
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
-                        '&.Mui-focusVisible': {
-                          outline: '2px solid',
-                          outlineColor: 'primary.main',
-                          outlineOffset: 3,
-                        },
-                      }),
-                }}
-              >
+          <NavigationLinkItem
+            LinkComponent={LogoLinkComponent}
+            sharedActionStyles={LOGO_BUTTON_STYLES}
+            displayLabel={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <TaskAltIcon
                   color="primary"
                   sx={{ fontSize: { xs: 24, sm: 28 } }}
@@ -135,13 +107,17 @@ export const Header = ({
                     letterSpacing: '-0.03em',
                     fontSize: { xs: '0.95rem', sm: '1.1rem' },
                     color: 'text.primary',
+                    display: 'none',
+                    '@media (min-width: 820px)': {
+                      display: 'block',
+                    },
                   }}
                 >
                   {APPLICATION_NAME}
                 </Typography>
-              </ButtonBase>
-            )}
-          </LogoLinkComponent>
+              </Box>
+            }
+          />
 
           <Divider
             orientation="vertical"
@@ -160,11 +136,11 @@ export const Header = ({
         >
           <ThemeSelector
             activeThemeMode={activeThemeMode}
-            onThemeChangeAction={onThemeChangeAction}
+            onThemeChange={onThemeChange}
           />
           <AccountActions
             authenticatedOperatorName={authenticatedOperatorName}
-            onLogoutTrigger={onLogoutTrigger}
+            onLogout={onLogout}
           />
         </Box>
       </Toolbar>

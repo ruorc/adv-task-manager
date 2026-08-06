@@ -36,4 +36,6 @@ export interface NavigationRegistry {
   readonly rootLink: ComponentType<LinkComponentProps>;
   /** Complete immutable collection containing abstract navigation configurations for the main menu */
   readonly links: readonly NavigationItem[];
+  /** Optional reactive action node injected dynamically into the sticky infrastructure toolbar */
+  readonly actionBarSlot?: ReactNode;
 }

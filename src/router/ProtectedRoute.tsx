@@ -1,20 +1,22 @@
 import { type ComponentType, type JSX } from 'react';
 
 /**
- * Technical synchronization payload contract for structural route access control filters.
+ * Properties required to configure the session-based conditional route switcher.
  */
 export interface ProtectedRouteProps {
-  /** Cryptographic flag confirming whether the client session holds authenticated credentials */
+  /** Evaluation flag specifying if the current user possesses a verified session state. */
   readonly isUserAuthenticated: boolean;
-  /** Primary operational destination target component instantiated upon successful authorization */
+
+  /** Component rendered exclusively when the user session evaluation resolves to true. */
   readonly ActiveViewComponent: ComponentType;
-  /** Alternate guest fallback layout injected cleanly directly onto the target route destination block */
+
+  /** Fallback component rendered when an unauthenticated guest attempts to access a restricted path. */
   readonly GuestWallComponent: ComponentType;
 }
 
 /**
- * Deterministic authorization wall operating strictly on the route layer boundaries.
- * Isolates business view pages from session checking routines by intercepting active view graphs.
+ * Authorization guard component isolating core business layers from authentication checking pipelines.
+ * Conditionally mounts target views or fallback screens depending on user session states.
  */
 export const ProtectedRoute = ({
   isUserAuthenticated,

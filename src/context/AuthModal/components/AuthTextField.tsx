@@ -8,13 +8,13 @@ import type { ReadonlyAuthForm } from '../types/authFormTypes';
  * Structural contract defining properties for the reusable authentication text field.
  */
 interface AuthTextFieldProps {
-  /** The unique field identifier and form registration key */
+  /** The name of the field, corresponding to the form's data structure. */
   readonly name: keyof ReadonlyAuthForm;
-  /** The visual text descriptor rendered as the input decoration label */
+  /** The label text displayed above the input field. */
   readonly label: string;
-  /** Input mechanism variation protocol determining symbol masking (e.g., text, email, password) */
+  /** The type of input expected (e.g., text, email, password). Defaults to 'text'. */
   readonly type?: 'text' | 'email' | 'password';
-  /** Explicit verification operator marking field compliance as mandatory */
+  /** Indicates whether the field is mandatory for form submission. Defaults to false. */
   readonly required?: boolean;
 }
 

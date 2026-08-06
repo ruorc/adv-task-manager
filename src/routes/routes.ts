@@ -9,6 +9,12 @@ export const ROUTES = Object.freeze({
   ABOUT: '/about',
   /** Protected workspaces context view rendering operator Kanban boards dashboards */
   WORKSPACES: '/workspaces',
+  /** Structural workspace detail pattern rendering layout boundaries for a specific board */
+  BOARD_DETAIL: '/workspaces/boards/:boardId',
+  /** Nested column profile template rendering localized card lists inside a single board */
+  COLUMN_DETAIL: '/workspaces/columns/:columnId',
+  /** Deep-link task node template tracking final execution details, briefs and ownership metrics */
+  TASK_DETAIL: '/workspaces/tasks/:taskId',
   /** Deep-link fallback route capturing unmapped entry attempts for systemic resets */
   NOT_FOUND: '*',
 } as const);
@@ -21,13 +27,18 @@ export type AppRoutePattern = (typeof ROUTES)[keyof typeof ROUTES];
 
 /**
  * Dynamic route path utility generators to prevent manual string interpolation across components.
- * Reserved for future dynamic URI pattern generation.
  */
 export const routeHelpers = Object.freeze({
   /**
-   * Generates a valid absolute path string for a specific book detail profile view.
-   * Accepts a strict unique non-nullable string identifier matching the core Book domain entity id contract.
-   * Produces a fully qualified destination route path format string like /books/123.
+   * Compiles a valid client-side navigation pathway directly targeting a unique board view.
    */
-  bookDetail: (id: string): string => `/books/${id}`,
+  boardDetail: (boardId: string): string => `/workspaces/boards/${boardId}`,
+  /**
+   * Compiles a valid client-side navigation pathway directly targeting a unique nested column view.
+   */
+  columnDetail: (columnId: string): string => `/workspaces/columns/${columnId}`,
+  /**
+   * Compiles a valid client-side navigation pathway directly targeting the final task profile execution page.
+   */
+  taskDetail: (taskId: string): string => `/workspaces/tasks/${taskId}`,
 } as const);

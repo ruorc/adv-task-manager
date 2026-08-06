@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, type JSX } from 'react';
 
 import { AuthModal } from '../components/AuthModal';
 import { AuthModalContext } from '../context/AuthModalContext';
-import { AUTH_MODES } from '../constants/authConstants';
+import { AUTH_MODES } from '../constants/authModalConstants';
 
 import type {
   AuthModalContextProps,
@@ -15,6 +15,7 @@ import type { AuthModeType } from '../types/authFormTypes';
  */
 export const AuthModalProvider = ({
   children,
+  onSubmitAction,
 }: AuthModalProviderProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeMode, setActiveMode] = useState<AuthModeType>(AUTH_MODES.LOGIN);
@@ -46,6 +47,7 @@ export const AuthModalProvider = ({
         isOpen={isOpen}
         onClose={closeAuth}
         initialMode={activeMode}
+        onSubmitAction={onSubmitAction}
       />
     </AuthModalContext.Provider>
   );

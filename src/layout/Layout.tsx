@@ -1,22 +1,12 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  type JSX,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, type JSX, type ReactNode } from 'react';
 import Box from '@mui/material/Box';
 
 import { useAuth } from '@/context/Auth';
 import { useSnack } from '@/context/Snack';
 import { ScrollToTop } from '@/components/UI/ScrollToTop';
 import { useTheme } from '@/context/Theme';
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { Footer } from './Footer/Footer';
 import { Header } from './Header/Header';
-import { Main } from './Main/Main';
-import { Sidebar } from './Sidebar/Sidebar';
 
 import type { NavigationRegistry } from '@/types/navigation';
 
@@ -42,9 +32,6 @@ export const Layout = ({
   const { isAuthenticated, operatorName, executeLogoutSequence } = useAuth();
   const { showSuccessSnack, showInfoSnack } = useSnack();
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] =
-    useState<boolean>(false);
-
   const headerTrackerRef = useRef<HTMLElement | null>(null);
   const previousThemeRef = useRef<string>(theme);
   const previousAuthRef = useRef<boolean>(isAuthenticated);
@@ -57,9 +44,9 @@ export const Layout = ({
     previousAuthRef.current = isAuthenticated;
 
     if (isAuthenticated && operatorName) {
-      showSuccessSnack(APPLICATION_LOCALE.auth.welcome(operatorName));
+      showSuccessSnack(`Welcome, ${operatorName}!`);
     } else if (!isAuthenticated && stoodValidSessionTransition) {
-      showSuccessSnack(APPLICATION_LOCALE.auth.goodbye);
+      showSuccessSnack('Session terminated successfully. Goodbye!');
     }
   }, [isAuthenticated, operatorName, showSuccessSnack]);
 
@@ -67,12 +54,8 @@ export const Layout = ({
     if (previousThemeRef.current === theme) return;
 
     previousThemeRef.current = theme;
-    showInfoSnack(APPLICATION_LOCALE.theme.updated(theme));
+    showInfoSnack(`Theme preference updated to: ${theme}`);
   }, [theme, showInfoSnack]);
-
-  const handleSidebarToggleState = useCallback((): void => {
-    setIsMobileSidebarOpen((prev) => !prev);
-  }, []);
 
   return (
     <Box
@@ -84,27 +67,21 @@ export const Layout = ({
         color: 'text.primary',
       }}
     >
-      <Box ref={headerTrackerRef}>
-        <Header
-          authenticatedOperatorName={isAuthenticated ? operatorName : null}
-          activeThemeMode={theme}
-          isSidebarRendered={isAuthenticated}
-          navigationRegistry={navigationRegistry}
-          onLogoutTrigger={executeLogoutSequence}
-          onThemeChangeAction={setTheme}
-          onToggleSidebar={handleSidebarToggleState}
-        />
-      </Box>
+      <Header
+        authenticatedOperatorName={isAuthenticated ? operatorName : null}
+        activeThemeMode={theme}
+        navigationRegistry={navigationRegistry}
+        onLogout={executeLogoutSequence}
+        onThemeChange={setTheme}
+      />
 
-      <Box sx={{ display: 'flex', flexGrow: 1, alignItems: 'stretch' }}>
-        {isAuthenticated && (
-          <Sidebar
-            isMobileOpen={isMobileSidebarOpen}
-            onToggleAction={handleSidebarToggleState}
-          />
-        )}
-
-        <Main>{children}</Main>
+      <Box
+        component="main"
+        id="main-content"
+        tabIndex={-1}
+        sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }}
+      >
+        {children}
       </Box>
 
       <Footer />

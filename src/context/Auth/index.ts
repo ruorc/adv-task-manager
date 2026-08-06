@@ -1,20 +1,20 @@
-import { AuthProvider } from './providers/AuthProvider';
+import { GenericAuthProvider } from './providers/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 
-import type { AuthContextProps } from './types/types';
+import type { AuthContextProps } from './types/authContextTypes';
 
 /**
- * Public structural core entry contract exporting orchestrated authentication provider components,
- * reactive context hooks, and strongly typed interface definition layouts.
+ * Global authentication module entry point providing state management structures, hooks, and context.
  */
 export {
-  /** Centralized Infrastructure Provider managing global core firebase authentication session pipelines */
-  AuthProvider,
-  /** Standard security interceptor hook extracting active authorization operational vectors */
+  /** Component that initializes session monitoring and distributes the authentication state tree. */
+  GenericAuthProvider,
+
+  /** Hook to access the current authentication context values, user profile data, and session actions. */
   useAuth,
 };
 
 export type {
-  /** Structural definition contract specifying credentials tokens exposed by the authentication context tree */
+  /** Contract defining the operational state properties and asynchronous actions exposed by the context provider. */
   AuthContextProps,
 };

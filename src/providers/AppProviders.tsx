@@ -1,17 +1,18 @@
-import { type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useCallback } from 'react';
 
-import { AuthProvider } from '@/context/Auth';
+import { GenericAuthProvider } from '@/context/Auth';
 import { ThemeProvider } from '@/context/Theme';
 import { ConfirmProvider } from '@/context/Confirm';
 import { SnackProvider } from '@/context/Snack';
-import { AuthModalProvider } from '@/context/AuthModal';
+import { AuthModalProvider, type ReadonlyAuthForm } from '@/context/AuthModal';
+import { firebaseAuthService } from '@/firebase/services/FirebaseAuthService';
 
 /**
  * Structural communication contract specifying properties required to initialize
  * the unified application orchestration pipeline.
  */
 interface AppProvidersProps {
-  /** The nested tree root component tree cluster wrapped inside the global state matrix */
+  /** React node tree to be wrapped by the application providers. */
   readonly children: ReactNode;
 }
 
@@ -20,15 +21,28 @@ interface AppProvidersProps {
  * Composes all global context domains into a singular flat component node.
  */
 export const AppProviders = ({ children }: AppProvidersProps): JSX.Element => {
+  const handleAuthSubmission = useCallback(
+    async (data: ReadonlyAuthForm, isRegister: boolean): Promise<void> => {
+      if (isRegister) {
+        await firebaseAuthService.register(data);
+      } else {
+        await firebaseAuthService.login(data);
+      }
+    },
+    []
+  );
+
   return (
-    <AuthProvider>
+    <GenericAuthProvider authService={firebaseAuthService}>
       <ThemeProvider>
         <ConfirmProvider>
           <SnackProvider>
-            <AuthModalProvider>{children}</AuthModalProvider>
+            <AuthModalProvider onSubmitAction={handleAuthSubmission}>
+              {children}
+            </AuthModalProvider>
           </SnackProvider>
         </ConfirmProvider>
       </ThemeProvider>
-    </AuthProvider>
+    </GenericAuthProvider>
   );
 };

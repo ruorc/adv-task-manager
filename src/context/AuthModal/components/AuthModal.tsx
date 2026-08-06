@@ -6,9 +6,8 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { APPLICATION_LOCALE } from '@/constants/localeConstants';
 import { AuthModalForm } from './AuthModalForm';
-import { AUTH_MODES } from '../constants/authConstants';
+import { AUTH_MODES } from '../constants/authModalConstants';
 
 import type { AuthModalProps, AuthModeType } from '../types/authFormTypes';
 
@@ -21,6 +20,7 @@ export const AuthModal = ({
   onClose,
   onAuthSuccess,
   initialMode = AUTH_MODES.LOGIN,
+  onSubmitAction,
 }: AuthModalProps): JSX.Element => {
   const [currentMode, setCurrentMode] = useState<AuthModeType>(initialMode);
 
@@ -61,7 +61,7 @@ export const AuthModal = ({
       }}
     >
       <IconButton
-        aria-label={APPLICATION_LOCALE.auth.accessibility.closeModal}
+        aria-label="Close authentication dialog"
         onClick={handleCloseAndReset}
         size="small"
         sx={{
@@ -97,6 +97,7 @@ export const AuthModal = ({
           currentMode={currentMode}
           onModeToggle={setCurrentMode}
           onFormSuccess={handleSuccessCallback}
+          onSubmitAction={onSubmitAction}
         />
       </Box>
     </Dialog>

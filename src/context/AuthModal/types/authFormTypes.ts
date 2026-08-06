@@ -1,36 +1,41 @@
-import { AUTH_MODES } from '../constants/authConstants';
+import { AUTH_MODES } from '../constants/authModalConstants';
 
 /**
- * Strict structural token representative mapping indicating valid operational system states.
+ * Valid operational modes for the authentication workflow (e.g., login or registration).
  */
 export type AuthModeType = (typeof AUTH_MODES)[keyof typeof AUTH_MODES];
 
 /**
- * Structural credentials blueprint enforcing compile-time immutable parameters.
+ * Immutable credentials payload captured from the authentication forms.
  */
 export interface ReadonlyAuthForm {
-  /** Target communication electronic mail account entry token */
+  /** The unique email address provided by the user. */
   readonly email: string;
-  /** Secure encrypted character string vector confirming client validation profiles */
+  /** The account password credentials. */
   readonly password: string;
-  /** Verification vector to confirm identical match against primary password parameter */
+  /** Optional password confirmation used exclusively during registration. */
   readonly confirmPassword?: string;
-  /** Alphanumeric sequence representing the individual operator personal forename */
+  /** Optional first name of the registering user. */
   readonly firstName?: string;
-  /** Alphanumeric sequence representing the individual operator personal family name */
+  /** Optional last name of the registering user. */
   readonly lastName?: string;
 }
 
 /**
- * Structural communication contract defining parameters required to render the authentication dialog.
+ * Configuration and lifecycle management properties for rendering the authentication modal dialog.
  */
 export interface AuthModalProps {
-  /** Reactive state flag determining if the overlay view is visible */
+  /** Controls the visibility state of the authentication modal. */
   readonly isOpen: boolean;
-  /** Callback executed on dialog dismissal or cancellation */
+  /** Callback triggered to request closing the modal interface. */
   readonly onClose: () => void;
-  /** Optional callback triggered immediately upon successful session establishment */
+  /** Optional callback executed immediately after a successful authentication event. */
   readonly onAuthSuccess?: () => void;
-  /** Force the modal stream to boot directly into a specific architectural state alignment */
+  /** Optional default mode the form should display upon opening. */
   readonly initialMode?: AuthModeType;
+  /** Asynchronous handler delegating the credential payload submission to parent architectures. */
+  readonly onSubmitAction: (
+    data: ReadonlyAuthForm,
+    isRegister: boolean
+  ) => Promise<void>;
 }
