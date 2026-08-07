@@ -1,8 +1,10 @@
 import { type ComponentType } from 'react';
 import { type RouteObject } from 'react-router';
+import { type QueryClient } from '@tanstack/react-query';
 
 import { PageLoader } from '@/components/UI/PageLoader';
 import { ROUTES } from '@/routes';
+import { workspacesDomainLoader } from '@/utils/loader';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RouterContainer } from './RouterContainer';
 
@@ -27,10 +29,12 @@ const createProtectedRouteComponent = (
 
 /**
  * Generates the unified, static application routing hierarchy configuration.
- * Sets up lazy-loaded view paths, global providers, fallback view loaders, and access control wrappers.
+ * Accepts infrastructure dependencies to wire data fetch loaders inside lazy route targets.
  */
 export const getRouterConfig = (
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
+  queryClient: QueryClient,
+  getCurrentUserUid: () => string | undefined
 ): readonly RouteObject[] => [
   {
     HydrateFallback: PageLoader,
@@ -47,7 +51,7 @@ export const getRouterConfig = (
       {
         path: ROUTES.ABOUT,
         lazy: async () => {
-          const { AboutPage } = await import('@/views/AboutPage/AboutPage');
+          const { AboutPage } = await import('@/views/AboutPage');
 
           return { Component: AboutPage };
         },
@@ -58,7 +62,7 @@ export const getRouterConfig = (
           const { WorkspacesLayout } =
             await import('@/views/WorkspacesDomain/WorkspacesLayout');
           const { AuthWallPage } =
-            await import('@/views/WorkspacesDomain/AuthWallPage');
+            await import('@/views/WorkspacesDomain/pages/AuthWallPage');
 
           return {
             Component: createProtectedRouteComponent(
@@ -71,9 +75,10 @@ export const getRouterConfig = (
         children: [
           {
             index: true,
+            loader: workspacesDomainLoader(queryClient, getCurrentUserUid),
             lazy: async () => {
               const { WorkspacesPage } =
-                await import('@/views/WorkspacesDomain/WorkspacesPage/WorkspacesPage');
+                await import('@/views/WorkspacesDomain/pages/WorkspacesPage');
 
               return { Component: WorkspacesPage };
             },
@@ -82,7 +87,7 @@ export const getRouterConfig = (
             path: ROUTES.BOARD_DETAIL,
             lazy: async () => {
               const { BoardDetailPage } =
-                await import('@/views/WorkspacesDomain/BoardDetailPage');
+                await import('@/views/WorkspacesDomain/pages/BoardDetailPage');
 
               return { Component: BoardDetailPage };
             },
@@ -91,7 +96,7 @@ export const getRouterConfig = (
             path: ROUTES.COLUMN_DETAIL,
             lazy: async () => {
               const { ColumnDetailPage } =
-                await import('@/views/WorkspacesDomain/ColumnDetailPage');
+                await import('@/views/WorkspacesDomain/pages/ColumnDetailPage');
 
               return { Component: ColumnDetailPage };
             },
@@ -100,7 +105,7 @@ export const getRouterConfig = (
             path: ROUTES.TASK_DETAIL,
             lazy: async () => {
               const { TaskDetailPage } =
-                await import('@/views/WorkspacesDomain/TaskDetailPage');
+                await import('@/views/WorkspacesDomain/pages/TaskDetailPage');
 
               return { Component: TaskDetailPage };
             },

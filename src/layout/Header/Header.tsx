@@ -86,6 +86,7 @@ export const Header = ({
           justifyContent: 'space-between',
           px: { xs: 2, sm: 3 },
           minHeight: { xs: 64, sm: 70 },
+          gap: 2,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -108,7 +109,7 @@ export const Header = ({
                     fontSize: { xs: '0.95rem', sm: '1.1rem' },
                     color: 'text.primary',
                     display: 'none',
-                    '@media (min-width: 820px)': {
+                    '@media (min-width: 850px)': {
                       display: 'block',
                     },
                   }}

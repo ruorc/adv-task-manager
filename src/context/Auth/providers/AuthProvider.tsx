@@ -9,7 +9,7 @@ import {
 
 import { AuthContext } from '../context/AuthContext';
 
-import type { AppUser } from '@/context/User/userTypes';
+import type { AppUser } from '@/context/UserEntity/userTypes';
 import type { AuthService } from '@/context/Auth/types/authServiceTypes';
 import type { AuthContextProps } from '../types/authContextTypes';
 

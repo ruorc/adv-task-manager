@@ -1,4 +1,4 @@
-import type { AppUser } from '@/context/User';
+import type { AppUser } from '@/context/UserEntity';
 
 /**
  * Universal contract for any authentication service within the application.

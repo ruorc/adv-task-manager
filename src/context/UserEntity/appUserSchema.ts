@@ -1,5 +1,7 @@
 import Joi from 'joi';
+
 import { userFieldsValidation } from './validation';
+
 import type { AppUser } from './userTypes';
 
 /**

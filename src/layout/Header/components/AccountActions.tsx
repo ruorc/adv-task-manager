@@ -36,8 +36,9 @@ export const AccountActions = ({
           fontSize: '0.875rem',
         }}
       >
-        authenticatedOperatorName ? `Welcome, ${authenticatedOperatorName}` :
-        'Welcome, Guest'
+        {authenticatedOperatorName
+          ? `Welcome, ${authenticatedOperatorName}`
+          : 'Welcome, Guest'}
       </Typography>
 
       {authenticatedOperatorName ? (
@@ -58,7 +59,7 @@ export const AccountActions = ({
             },
           }}
         >
-          'Logout'
+          Logout
         </Button>
       ) : (
         <Button

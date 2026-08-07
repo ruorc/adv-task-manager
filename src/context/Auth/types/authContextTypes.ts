@@ -1,4 +1,4 @@
-import type { AppUser } from '@/context/User';
+import type { AppUser } from '@/context/UserEntity';
 
 /**
  * Structural definition contract specifying credentials tokens exposed by the authentication context tree.

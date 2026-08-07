@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { userFieldsValidation } from '@/context/User';
+import { userFieldsValidation } from '@/context/UserEntity';
 
 import type { ReadonlyAuthForm } from '../types/authFormTypes';
 

@@ -1,8 +1,9 @@
 import { useMemo, type JSX, type ReactNode } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigation } from 'react-router';
 
 import { Layout } from '@/layout/Layout';
 import { ROUTES } from '@/routes';
+import { PageLoader } from '@/components/UI/PageLoader';
 import type { NavigationRegistry } from '@/types/navigation';
 
 /**
@@ -36,14 +37,17 @@ const createLinkComponent = (to: string) => {
 
 /**
  * Internal reactive routing lifecycle container running strictly inside the Router context.
- * Coordinates global application navigation registries and structural layout framing.
+ * Coordinates global application navigation registries, pending transition states, and structural layout framing.
  */
 export const RouterContainer = (): JSX.Element => {
+  const navigation = useNavigation();
+
+  /** Intercept ongoing background thread transactions and loader evaluations across boundaries */
+  const isNavigating = navigation.state === 'loading';
+
   const globalNavigationRegistry = useMemo<NavigationRegistry>(
     () => ({
-      /** Injected route factory link bound strictly to the application root pathway for logo controls */
       rootLink: createLinkComponent(ROUTES.ABOUT),
-      /** Complete immutable collection containing abstract navigation configurations for the main menu */
       links: [
         {
           id: 'about',
@@ -62,6 +66,8 @@ export const RouterContainer = (): JSX.Element => {
 
   return (
     <Layout navigationRegistry={globalNavigationRegistry}>
+      {/* Intercept pipeline transmission steps and layout transitions with a high-performance overlay */}
+      {isNavigating && <PageLoader />}
       <Outlet />
     </Layout>
   );

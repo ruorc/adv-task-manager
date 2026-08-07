@@ -7,6 +7,7 @@ import {
 
 import { PageLoader } from '@/components/UI/PageLoader';
 import { useAuth } from '@/context/Auth';
+import { queryClient } from '@/utils/queryClient';
 import { getRouterConfig } from './routerConfig';
 
 /**
@@ -14,13 +15,16 @@ import { getRouterConfig } from './routerConfig';
  * Delegates node routing tree compiles directly to the specialized router config module.
  */
 export const AppRouter = (): JSX.Element => {
-  const { isInitializing, isAuthenticated } = useAuth();
+  const { isInitializing, isAuthenticated, user } = useAuth();
 
   const browserRouterInstance = useMemo(() => {
+    /** Establish a stable functional accessor to extract user identities inside route loader passes */
+    const getCurrentUserUid = () => user?.uid;
+
     return createBrowserRouter([
-      ...getRouterConfig(isAuthenticated),
+      ...getRouterConfig(isAuthenticated, queryClient, getCurrentUserUid),
     ] as RouteObject[]);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.uid]);
 
   if (isInitializing) {
     return <PageLoader />;

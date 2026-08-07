@@ -13,8 +13,8 @@ import { FIREBASE_AUTH_ERRORS } from '../constants/firebaseConstants';
 import { firestoreUserService } from './FirestoreUserService';
 
 import type { ReadonlyAuthForm } from '@/context/AuthModal';
-import type { AuthService } from '@/context/Auth/types/authServiceTypes';
-import type { AppUser } from '@/context/User/userTypes';
+import type { AuthService } from '@/context/Auth';
+import type { AppUser } from '@/context/UserEntity';
 
 const logger = sysLogger.forModule('FirebaseAuthService');
 
