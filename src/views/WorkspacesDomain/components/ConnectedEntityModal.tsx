@@ -40,7 +40,7 @@ export const ConnectedEntityModal = ({
   isOpen,
   onClose,
   mode,
-  entityType,
+  entityType: EntityType,
 }: ConnectedEntityModalProps): JSX.Element => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
   const queryClient = useQueryClient(); 
@@ -58,11 +58,11 @@ export const ConnectedEntityModal = ({
   const initialData: ReadonlyKanbanForm | undefined = undefined;
 
   if (mode === FormMode.EDIT) {
-    if (entityType === EntityName.BOARD && boardId) {
+    if (EntityType === EntityName.BOARD && boardId) {
       // initialData = useAppSelector(state => selectBoardById(state, boardId));
-    } else if (entityType === EntityName.COLUMN && columnId) {
+    } else if (EntityType === EntityName.COLUMN && columnId) {
       // initialData = useAppSelector(state => selectColumnById(state, columnId));
-    } else if (entityType === EntityName.TASK && taskId) {
+    } else if (EntityType === EntityName.TASK && taskId) {
       // initialData = useAppSelector(state => selectTaskById(state, taskId));
     }
   }
@@ -84,19 +84,31 @@ export const ConnectedEntityModal = ({
    */
   const handleSaveData = useCallback(
     async (data: AppKanbanEntities | KanbanCreatePayload) => {
+       // ИСПРАВИТЬ: Временное использование const для удовлетворения ESLint prefer-const
+      const targetService = firestoreBoardService;
+      let queryKeyStr = 'boards';
+
+      if (EntityType === EntityName.COLUMN) {
+        // targetService = firestoreColumnService;
+        queryKeyStr = 'columns';
+      } else if (EntityType === EntityName.TASK) {
+        // targetService = firestoreTaskService;
+        queryKeyStr = 'tasks';
+      }
+
       try {
         if ('uid' in data && data.uid) {
-          await firestoreBoardService.updateBoard(data.uid, data);
-
+          await targetService.update(data.uid, data);
+          await queryClient.invalidateQueries({ queryKey: [queryKeyStr, data.uid] });
+          
           showSuccessSnack('Successfully updated!');
-
-          queryClient.invalidateQueries({ queryKey: ['boards', data.uid] });
         } else {
-          await firestoreBoardService.createBoard(data as KanbanCreatePayload);
+          await targetService.create(data as KanbanCreatePayload);
+
           showSuccessSnack('Successfully created!');
         }
         
-        queryClient.invalidateQueries({ queryKey: ['boards'] });
+        await queryClient.invalidateQueries({ queryKey: [queryKeyStr] });
 
         onClose();
       } catch (error) {
@@ -104,7 +116,7 @@ export const ConnectedEntityModal = ({
         showErrorSnack('Data not saved');
       }
     },
-    [showSuccessSnack, showErrorSnack, onClose, queryClient]
+    [showSuccessSnack, showErrorSnack, onClose, queryClient, EntityType]
   );
 
   return createElement(UniversalEntityModal, {
@@ -112,7 +124,7 @@ export const ConnectedEntityModal = ({
     onClose: onClose,
     onSubmit: handleSaveData,
     mode: mode,
-    entityType: entityType,
+    entityType: EntityType,
     initialData: initialData,
     availableUsers: availableUsers,
     availableBoards: availableBoards,
