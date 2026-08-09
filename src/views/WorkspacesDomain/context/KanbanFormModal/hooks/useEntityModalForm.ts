@@ -17,7 +17,7 @@ import type {
   KanbanCreatePayload,
 } from '@/types/appKanbanTypes';
 import type {
-  ReadonlyKanbanForm,
+  KanbanFormState,
   UniversalEntityModalProps,
 } from '../types/kanbanTypes';
 
@@ -25,10 +25,12 @@ const logger = sysLogger.forModule('useEntityModalForm');
 
 /**
  * Properties for the UseEntityModalForm hook, derived from the universal modal props.
+ * ИСПРАВЛЕНО: Убран Omit для 'availableUsers', так как этот справочник критически необходим
+ * хелперу buildSubmissionPayload для маппинга массива строк в объект Record.
  */
 type UseEntityModalFormProps = Omit<
   UniversalEntityModalProps,
-  'availableUsers' | 'availableBoards'
+  'availableBoards'
 >;
 
 /**
@@ -41,6 +43,7 @@ export const useEntityModalForm = ({
   mode,
   entityType,
   initialData,
+  availableUsers = {},
   availableColumns = {},
 }: UseEntityModalFormProps) => {
   const { user } = useAuth();
@@ -52,7 +55,7 @@ export const useEntityModalForm = ({
     readonly columnId?: string;
   }>();
 
-  const computedDefaultValues = useMemo<ReadonlyKanbanForm>(() => {
+  const computedDefaultValues = useMemo<KanbanFormState>(() => {
     return resolveInitialValues(
       mode,
       entityType,
@@ -63,7 +66,7 @@ export const useEntityModalForm = ({
     );
   }, [mode, entityType, initialData, boardId, columnId, availableColumns]);
 
-  const formMethods = useForm<ReadonlyKanbanForm>({
+  const formMethods = useForm<KanbanFormState>({
     resolver: joiResolver(entityValidationSchema, {
       allowUnknown: true,
       stripUnknown: true,
@@ -104,7 +107,7 @@ export const useEntityModalForm = ({
     }
   }, [watchedParent, entityType, availableColumns, boardId, setValue]);
 
-  const handleSubmitForm = (data: ReadonlyKanbanForm) => {
+  const handleSubmitForm = (data: KanbanFormState) => {
     if (!currentOperatorUid || !currentOperatorName) {
       logger.error(
         'Submission blocked: Cannot resolve active user session context.'
@@ -119,6 +122,7 @@ export const useEntityModalForm = ({
       entityType,
       currentOperatorUid,
       currentOperatorName,
+      availableUsers,
       initialData
     );
 

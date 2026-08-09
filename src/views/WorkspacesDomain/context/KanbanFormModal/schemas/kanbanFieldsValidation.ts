@@ -15,14 +15,13 @@ export const kanbanFieldsValidation = {
     'string.max': 'Description must be under 500 characters.',
   }),
 
-  // unknown(true) + pattern guarantee a strict Record<string, string> structure and default {}
-  assignees: Joi.object()
-    .pattern(Joi.string().trim(), Joi.string().trim())
-    .unknown(true)
-    .default({})
+  assignees: Joi.array()
+    .items(Joi.string().trim())
+    .min(0)
+    .default([])
     .messages({
-      'object.base':
-        'Assignees structural data must be a valid key-value collection mapping.',
+      'array.base':
+        'Assignees structural data must be a valid collection of user identifiers.',
     }),
 
   createdBy: Joi.string().trim().messages({

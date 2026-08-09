@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 
 import { EntityName, FormMode } from '../constants/constants';
+
 import type {
   AppKanbanEntities,
   KanbanCreatePayload,
@@ -8,6 +9,7 @@ import type {
 import type {
   EntityType,
   FormModeType,
+  KanbanFormState,
   ReadonlyKanbanForm,
 } from '../types/kanbanTypes';
 
@@ -28,7 +30,7 @@ export const resolveInitialValues = (
   columnId: string | undefined,
   /** Key-value catalog mapping active board columns to identities. */
   availableColumns: Record<string, string> = {}
-): ReadonlyKanbanForm => {
+): KanbanFormState => {
   let initialParent = initialData?.parent || null;
   let initialGrand = initialData?.grand || null;
 
@@ -51,6 +53,10 @@ export const resolveInitialValues = (
     }
   }
 
+  const initialAssigneesKeys = initialData?.assignees
+    ? Object.keys(initialData.assignees)
+    : [];
+
   return {
     uid: initialData?.uid || undefined,
     title: initialData?.title || '',
@@ -59,19 +65,19 @@ export const resolveInitialValues = (
     createdByName: initialData?.createdByName || '',
     isCompleted: initialData?.isCompleted || false,
     isDeleted: initialData?.isDeleted || false,
-    assignees: initialData?.assignees || {},
+    assignees: initialAssigneesKeys,
     parent: initialParent,
     grand: initialGrand,
   };
 };
 
 /**
- * Sanitizes input and strictly shapes the final submission payload
- * according to entity architectural limits.
+ * Sanitizes raw data fields, builds relational structures based on the entity type,
+ * and compiles the exact immutable payload for backend mutation pipelines.
  */
 export const buildSubmissionPayload = (
   /** The raw unverified dataset captured directly from form inputs. */
-  rawData: ReadonlyKanbanForm,
+  rawData: KanbanFormState,
   /** The operational workflow stage layout type. */
   mode: FormModeType,
   /** The target model type category being processed. */
@@ -80,6 +86,8 @@ export const buildSubmissionPayload = (
   operatorUid: string,
   /** The user profile name assigned to the dispatching entity. */
   operatorName: string,
+  /** Roster tracking target unique identification keys of selected team workers. */
+  availableUsers: Record<string, string>,
   /** Optional original baseline object for verifying untouched properties. */
   initialData?: ReadonlyKanbanForm
 ): AppKanbanEntities | KanbanCreatePayload | null => {
@@ -114,13 +122,13 @@ export const buildSubmissionPayload = (
     const isGrandChanged =
       (rawData.grand || null) !== (initialData.grand || null);
 
-    const rawAssigneesKeys = Object.keys(rawData.assignees || {});
-    const initialAssigneesKeys = Object.keys(initialData.assignees || {});
+    const initialAssigneesKeys = initialData.assignees
+      ? Object.keys(initialData.assignees)
+      : [];
+
     const isAssigneesChanged =
-      rawAssigneesKeys.length !== initialAssigneesKeys.length ||
-      !rawAssigneesKeys.every(
-        (key) => rawData.assignees[key] === initialData.assignees[key]
-      );
+      rawData.assignees.length !== initialAssigneesKeys.length ||
+      !rawData.assignees.every((uid) => initialAssigneesKeys.includes(uid));
 
     const hasAnyChanges =
       isTitleChanged ||
@@ -153,6 +161,18 @@ export const buildSubmissionPayload = (
     finalCreatedByName = initialData.createdByName;
   }
 
+  const serverAssigneesRecord = rawData.assignees.reduce<
+    Record<string, string>
+  >((acc, uid) => {
+    const userName = availableUsers[uid];
+
+    if (userName) {
+      acc[uid] = userName;
+    }
+
+    return acc;
+  }, {});
+
   const basePayload = {
     ...rawData,
     uid: finalUid,
@@ -160,6 +180,7 @@ export const buildSubmissionPayload = (
     description: sanitizedDescription,
     createdBy: finalCreatedBy,
     createdByName: finalCreatedByName,
+    assignees: serverAssigneesRecord,
     isCompleted: false,
     isDeleted: false,
   } as Record<string, unknown>;

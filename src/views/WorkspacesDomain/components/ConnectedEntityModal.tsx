@@ -1,5 +1,6 @@
 import { useCallback, createElement, type JSX } from 'react';
 import { useParams } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query'; 
 
 import { sysLogger } from '@/utils/logger';
 import { useSnack } from '@/context/Snack';
@@ -12,6 +13,7 @@ import { EntityName, FormMode, UniversalEntityModal } from '../context/KanbanFor
 
 import type { AppKanbanEntities, KanbanCreatePayload } from '@/types/appKanbanTypes';
 import type { EntityType, FormModeType } from '../context/KanbanFormModal';
+import type { ReadonlyKanbanForm } from '../context/KanbanFormModal/types/kanbanTypes';
 
 const logger = sysLogger.forModule('ConnectedEntityModal');
 
@@ -41,18 +43,19 @@ export const ConnectedEntityModal = ({
   entityType,
 }: ConnectedEntityModalProps): JSX.Element => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
+  const queryClient = useQueryClient(); 
+  
   const { boardId, columnId, taskId } = useParams<{
     readonly boardId?: string;
     readonly columnId?: string;
     readonly taskId?: string;
   }>();
 
-  /** Extract the current active session authentication status from the core security provider */
   const { user } = useAuth();
   const currentOperatorUid = user?.uid;
 
   // ИСПРАВИТЬ: Временное использование const для удовлетворения ESLint prefer-const
-  const initialData: Partial<AppKanbanEntities> | undefined = undefined;
+  const initialData: ReadonlyKanbanForm | undefined = undefined;
 
   if (mode === FormMode.EDIT) {
     if (entityType === EntityName.BOARD && boardId) {
@@ -84,19 +87,24 @@ export const ConnectedEntityModal = ({
       try {
         if ('uid' in data && data.uid) {
           await firestoreBoardService.updateBoard(data.uid, data);
+
           showSuccessSnack('Successfully updated!');
+
+          queryClient.invalidateQueries({ queryKey: ['boards', data.uid] });
         } else {
           await firestoreBoardService.createBoard(data as KanbanCreatePayload);
           showSuccessSnack('Successfully created!');
         }
         
+        queryClient.invalidateQueries({ queryKey: ['boards'] });
+
         onClose();
       } catch (error) {
         logger.error('Firestore transaction crashed', error);
         showErrorSnack('Data not saved');
       }
     },
-    [showSuccessSnack, showErrorSnack, onClose]
+    [showSuccessSnack, showErrorSnack, onClose, queryClient]
   );
 
   return createElement(UniversalEntityModal, {
