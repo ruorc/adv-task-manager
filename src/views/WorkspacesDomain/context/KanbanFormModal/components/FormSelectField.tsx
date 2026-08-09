@@ -1,6 +1,7 @@
 import React, { type JSX } from 'react';
 import {
   Controller,
+  get,
   type Control,
   type FieldErrors,
   type Path,
@@ -16,52 +17,50 @@ import {
   FormHelperText,
   Box,
 } from '@mui/material';
+import type { ReadonlyKanbanForm } from '../types/kanbanTypes';
 
-import type { EntityField } from '../constants/constants';
-import type { KanbanEntities } from '../types/types';
 
 /**
- * Represents a key-value data structure for data rendering within selection items.
+ * Represents a key-value data structure for data rendering 
+ * within selection items.
  */
-export interface SelectOption {
+interface SelectOption {
   /** Unique identifier of the option. */
-  uid: string;
+  readonly uid: string;
   /** The human-readable string displayed to users. */
-  label: string;
+  readonly label: string;
 }
 
 /**
- * Properties for the FormSelectField component.
+ * Properties for the FormSelectField component configuration.
  */
-export interface FormSelectFieldProps {
+interface FormSelectFieldProps {
   /** The specific entity field identifier managed by this input. */
-  name: EntityField & Path<KanbanEntities>;
+  readonly name: Path<ReadonlyKanbanForm>;
   /** The react-hook-form control object used to register and track the input state. */
-  control: Control<KanbanEntities>;
+  readonly control: Control<ReadonlyKanbanForm>;
   /** Object containing active form validation errors to display error messages. */
-  errors: FieldErrors<KanbanEntities>;
+  readonly errors: FieldErrors<ReadonlyKanbanForm>;
   /** The human-readable text label displayed over the input field. */
-  label: string;
+  readonly label: string;
   /** Array of formatted options available for selection. */
-  options: SelectOption[];
+  readonly options: SelectOption[];
   /** Optional flag to mark the field as required both visually and for validation constraints. */
-  required?: boolean;
+  readonly required?: boolean;
   /** Optional flag to enable multiple element selection. */
-  multiple?: boolean;
+  readonly multiple?: boolean;
   /** Context identifier specifying which entity form is being rendered to construct unique accessibility IDs. */
-  entityTypeContext: string;
+  readonly entityTypeContext: string;
   /** Optional Material UI icon component to display next to the values. */
-  icon?: React.ComponentType<{
-    /** Optional size constraint for the rendered icon. */
-    fontSize?: 'small';
-    /** Optional color theme intent variant for the icon state styling. */
-    color?: 'action' | 'disabled';
+  readonly icon?: React.ComponentType<{
+    /** Specific sizing scale override allocated to the icon element. */
+    readonly fontSize?: 'small';
+    /** UI action palette state applied to the icon element. */
+    readonly color?: 'action' | 'disabled';
   }>;
 }
 
-/**
- * A standardized dropdown selection field component integrated with react-hook-form and Material UI styling.
- */
+/** Standardized dropdown selection component integrated with react-hook-form. */
 export const FormSelectField = ({
   name,
   control,
@@ -74,6 +73,8 @@ export const FormSelectField = ({
   icon: Icon,
 }: FormSelectFieldProps): JSX.Element => {
   const labelId = `${entityTypeContext}-${name}-label`;
+
+  const fieldError = get(errors, name);
 
   const renderSelectedValue = (
     selected: string | string[] | undefined
@@ -112,17 +113,17 @@ export const FormSelectField = ({
       name={name}
       control={control}
       render={({ field }) => {
-        const selectValue = multiple
-          ? Array.isArray(field.value)
-            ? field.value
-            : []
-          : (field.value ?? '');
+        const isAssigneesField = name === 'assignees';
+        
+        const selectValue: string | string[] = multiple
+          ? (Array.isArray(field.value) ? field.value : [])
+          : ((field.value as string) ?? '');
 
         const isMultipleArray = multiple && Array.isArray(selectValue);
         const isOptionsRegistryEmpty = options.length === 0;
 
         return (
-          <FormControl fullWidth error={!!errors[name]} required={required}>
+          <FormControl fullWidth error={!!fieldError} required={required}>
             <InputLabel id={labelId}>{label}</InputLabel>
             <Select
               {...field}
@@ -137,17 +138,17 @@ export const FormSelectField = ({
               onChange={(e) => {
                 const newValue = e.target.value;
 
-                if (multiple && Array.isArray(newValue)) {
-                  field.onChange(newValue);
-                } else {
-                  field.onChange(newValue === '' ? null : newValue);
-                }
+                field.onChange(
+                  multiple && Array.isArray(newValue) 
+                    ? newValue 
+                    : (newValue === '' ? null : newValue)
+                );
               }}
             >
               {isOptionsRegistryEmpty ? (
                 <MenuItem disabled value="">
                   <ListItemText
-                    primary={`No available ${name === 'assignees' ? 'users' : 'items'} found`}
+                    primary={`No available ${isAssigneesField ? 'users' : 'items'} found`}
                     slotProps={{
                       primary: { color: 'text.disabled', variant: 'body2' },
                     }}
@@ -185,9 +186,7 @@ export const FormSelectField = ({
               )}
             </Select>
             <FormHelperText>
-              {errors[name]?.message
-                ? String(errors[name]?.message)
-                : undefined}
+              {fieldError?.message ? String(fieldError.message) : undefined}
             </FormHelperText>
           </FormControl>
         );

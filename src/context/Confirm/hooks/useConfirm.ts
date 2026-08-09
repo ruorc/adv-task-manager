@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { ConfirmContext } from '../context/ConfirmContext';
 
-import type { ConfirmContextType } from '../types/confirm';
+import type { ConfirmContextType } from '../types/confirmTypes';
 
 /**
  * Hook to access the confirmation dialog API.

@@ -1,16 +1,17 @@
-/**
- * Centralized application observability and diagnostics gateway class.
- * Allowed for manual instantiation when isolated logging configurations are requested.
- */
-export { AppLogger, sysLogger } from './AppLogger';
+import { AppLogger, sysLogger } from './AppLogger';
+
+import type { LogContext, ModuleLogger } from './types/loggerTypes';
+
+export {
+  /** Global logger orchestration engine processing systematic diagnostic entries. */
+  AppLogger,
+  /** Low-level internal operational instance tracing platform infrastructure states. */
+  sysLogger,
+};
 
 export type {
-  /**
-   * Structured context and metadata envelope for enriching diagnostic records with custom analytical metrics.
-   */
+  /** Structured contextual metadata assigned to diagnostic log records. */
   LogContext,
-  /**
-   * Localized domain proxy interface designed to isolate telemetry outputs within concrete structural application boundaries.
-   */
+  /** Logger client interface restricted to a single application module context. */
   ModuleLogger,
-} from './types/loggerTypes';
+};

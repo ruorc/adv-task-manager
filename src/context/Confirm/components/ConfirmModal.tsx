@@ -9,26 +9,19 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 
+import type { ConfirmOptions } from '../types/confirmTypes';
+
 /**
- * Structural communication contract defining data properties required to render the confirmation dialog.
+ * Structural communication contract extending core content options 
+ * with visibility controls and transactional lifecycle callbacks.
  */
-interface ConfirmModalProps {
-  /** Reactive state flag determining if the overlay view is visible */
+interface ConfirmModalProps extends ConfirmOptions {
+  /** Reactive state flag determining if the overlay view is visible. */
   readonly isOpen: boolean;
-  /** Primary semantic text rendered as the structural header */
-  readonly title: string;
-  /** Textual description contextualizing the action */
-  readonly description: string;
-  /** Interactive action title for the confirm trigger */
-  readonly confirmLabel?: string;
-  /** Cancellation title for the fallback trigger */
-  readonly cancelLabel?: string;
-  /** Callback executed on affirmative action confirmation */
+  /** Callback executed on affirmative action confirmation. */
   readonly onConfirm: () => void;
-  /** Callback executed on dialog dismissal or cancellation */
+  /** Callback executed on dialog dismissal or cancellation. */
   readonly onClose: () => void;
-  /** Theme vector flag routing layout styles to critical palettes */
-  readonly isDanger?: boolean;
 }
 
 /**

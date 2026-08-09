@@ -6,7 +6,7 @@ import { useEntityModalForm } from '../hooks/useEntityModalForm';
 import type {
   ModalContextValue,
   UniversalEntityModalProps,
-} from '../types/types';
+} from '../types/kanbanTypes';
 
 /**
  * Properties for the EntityModalProvider component.

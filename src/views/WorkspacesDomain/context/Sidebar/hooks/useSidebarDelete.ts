@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useConfirm } from '@/context/Confirm';
 import { useSnack } from '@/context/Snack';
 import { UI_TEXTS } from '../constants/texts';
-import { EntityType } from '../../KanbanFormModal';
+import { EntityName } from '../../KanbanFormModal';
 
 import type { KanbanEntities } from '../../KanbanFormModal';
 import { sysLogger } from '@/utils/logger';
@@ -23,9 +23,9 @@ export const useSidebarDelete = (currentEntity: EntityData) => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
 
   const handleDelete = useCallback(
-    async (entityType: EntityType) => {
+    async (entityType: EntityName) => {
       const isContainerEntity =
-        entityType === EntityType.BOARD || entityType === EntityType.COLUMN;
+        entityType === EntityName.BOARD || entityType === EntityName.COLUMN;
 
       if (isContainerEntity && !currentEntity.isEmpty) {
         showErrorSnack(UI_TEXTS.DELETE_ERROR_NOT_EMPTY);

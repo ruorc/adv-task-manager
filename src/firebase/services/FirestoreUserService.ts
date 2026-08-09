@@ -1,8 +1,8 @@
 import { sysLogger } from '@/utils/logger';
-import { appUserSchema } from '@/context/UserEntity';
+import { appUserSchema } from '@/schemas/appUserSchema';
 import { BaseFirestoreService } from './BaseFirestoreService';
 
-import type { AppUser } from '@/context/UserEntity';
+import type { AppUser } from '@/types/appUserTypes';
 
 /**
  * Singleton instance manager coordinating database persistence,

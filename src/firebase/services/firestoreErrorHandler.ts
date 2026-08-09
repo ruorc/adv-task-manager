@@ -1,4 +1,4 @@
-import type { BaseServiceLogger } from './types';
+import type { BaseServiceLogger } from '../types/firestoreTypes';
 
 /**
  * Centralized exception parser isolating explicit state details from public interfaces.

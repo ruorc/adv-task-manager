@@ -20,7 +20,7 @@ import { compileMuiThemeRegistry } from '../utils/themeFactory';
 import { useSystemTheme } from '../hooks/useSystemTheme';
 import { useStorageSync } from '../hooks/useStorageSync';
 
-import type { ResolvedThemeMode, ThemeMode } from '../types/theme';
+import type { ResolvedThemeMode, ThemeMode } from '../types/themeTypes';
 
 /**
  * Structural contract defining properties expected by the global application theme coordinator.

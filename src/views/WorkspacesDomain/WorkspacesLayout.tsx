@@ -4,9 +4,7 @@ import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
 
 import { WorkspacesSidebar } from './context/Sidebar/WorkspacesSidebar';
 import { WorkspacesSubHeader } from './components/WorkspacesSubHeader';
-
-/** Static constant metric defining the fixed structural width of the workspaces side navigation drawer */
-const SIDEBAR_WIDTH = 256;
+import { SIDEBAR_WIDTH } from './constants/constants';
 
 /**
  * Structural layout component encompassing the entire Workspaces domain.

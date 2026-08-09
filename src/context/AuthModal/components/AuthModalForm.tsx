@@ -8,26 +8,43 @@ import Link from '@mui/material/Link';
 
 import { sysLogger } from '@/utils/logger/AppLogger';
 import { AuthTextField } from './AuthTextField';
-import { authSchema } from '../schema/authSchema';
+import { authSchema } from '../schemas/authSchema';
 import { AUTH_MODES, AUTH_TEXTS } from '../constants/authModalConstants';
 
+import type { LoginPayload, RegistrationPayload } from '@/types/appUserTypes';
 import type { ReadonlyAuthForm, AuthModeType } from '../types/authFormTypes';
 
 /**
- * Properties required to initialize and manage user authentication form layouts and events.
+ * Configuration properties required to initialize and manage 
+ * user authentication form layouts and event workflows.
  */
 interface AuthModalFormProps {
-  /** The operational layout mode determining which credential fields are visible. */
+  /** The current active layout mode of the authentication form. */
   readonly currentMode: AuthModeType;
-  /** Callback executed when switching views between login and registration layouts. */
-  readonly onModeToggle: (mode: AuthModeType) => void;
-  /** Callback executed after successful execution of submission workflows. */
+  /** Callback to toggle between login and registration modes. */
+  readonly onModeToggle: (
+    /** The target authentication mode to switch to. */
+    mode: AuthModeType
+  ) => void;
+  /** Callback executed when the form is submitted successfully. */
   readonly onFormSuccess: () => void;
-  /** Asynchronous action handling the orchestration of authentication requests using internal form data. */
-  readonly onSubmitAction: (
-    data: ReadonlyAuthForm,
-    isRegister: boolean
-  ) => Promise<void>;
+  /** Action handler executing registration or login based on the mode. */
+  readonly onSubmitAction: {
+    /** Submits the registration form data. */
+    (
+      /** The user registration form payload fields. */
+      data: RegistrationPayload,
+      /** Flag explicitly set to true for registration. */
+      isRegister: true
+    ): Promise<void>;
+    /** Submits the login form data. */
+    (
+      /** The user login credential form fields. */
+      data: LoginPayload,
+      /** Flag explicitly set to false for login. */
+      isRegister: false
+    ): Promise<void>;
+  };
 }
 
 /**
@@ -71,14 +88,13 @@ export const AuthModalForm = ({
   const handleFormSubmit = async (data: ReadonlyAuthForm): Promise<void> => {
     setSubmissionError(null);
 
-    if (isRegisterMode && data.password !== data.confirmPassword) {
-      setSubmissionError(String(AUTH_TEXTS.ERROR_MATCH));
-
-      return;
-    }
-
     try {
-      await onSubmitAction(data, isRegisterMode);
+      if (isRegisterMode) {
+        await onSubmitAction(data as RegistrationPayload, true);
+      } else {
+        await onSubmitAction(data as LoginPayload, false);
+      }
+      
       onFormSuccess();
       reset();
     } catch (error) {

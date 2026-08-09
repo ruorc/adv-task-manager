@@ -1,11 +1,29 @@
-/** Main visual component serving as the interface entry point. */
-export { UniversalEntityModal } from './UI/UniversalEntityModal';
+import { UniversalEntityModal } from './UI/UniversalEntityModal';
+import { EntityName, FormMode } from './constants/constants';
+import { entityValidationSchema } from './schemas/entityValidationSchema';
 
-/** Core Joi validation schema enforcing entity business rules and integrity boundaries. */
-export { entityValidationSchema } from './schemas/validationSchema';
+import type { EntityType, FormModeType } from './types/kanbanTypes';
 
-/** Common core typescript data definitions and data-contract models. */
-export * from './types/types';
+/**
+ * Public domain entry contract exporting orchestrated Kanban view layout elements and execution constants.
+ */
+export {
+  /** Core string literal registry defining valid structural component classification types. */
+  EntityName,
+  /** Configuration collection mapping system layout state behaviors. */
+  FormMode,
+  /** Main visual component serving as the interface entry point. */
+  UniversalEntityModal,
+  /** Core Joi validation schema enforcing entity business rules and integrity boundaries. */
+  entityValidationSchema,
+};
 
-/** Common architectural field configurations, operational states, and localization records. */
-export * from './constants/constants';
+/**
+ * Shared domain contracts and validation logic configurations.
+ */
+export type {
+  /** Structural identification categorization boundaries applied to board objects. */
+  EntityType,
+  /** Operational phase state flags restricting modal rendering paths. */
+  FormModeType,
+};

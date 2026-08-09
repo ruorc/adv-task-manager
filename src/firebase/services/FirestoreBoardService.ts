@@ -1,19 +1,22 @@
 import { sysLogger } from '@/utils/logger';
-import { finalPayloadValidationSchema } from '@/context/KanbanEntities';
 import { BaseFirestoreService } from './BaseFirestoreService';
+import { appKanbanEntitiesSchema } from '@/schemas/appKanbanSchema';
 
-import type { KanbanEntities } from '@/views/WorkspacesDomain/context/KanbanFormModal/types/types.ts';
+import type {
+  AppKanbanEntities,
+  KanbanCreatePayload,
+} from '@/types/appKanbanTypes';
 
 /**
  * Singleton instance manager coordinating database persistence,
  * runtime schema validation, and operational queries for Kanban boards.
  */
-export class FirestoreBoardService extends BaseFirestoreService<KanbanEntities> {
+export class FirestoreBoardService extends BaseFirestoreService<AppKanbanEntities> {
   /** Root database collection target configuration for board documents. */
   protected collectionName = 'boards';
 
   /** Active runtime evaluation validation blueprints backing board structures. */
-  protected schema = finalPayloadValidationSchema;
+  protected schema = appKanbanEntitiesSchema;
 
   /**
    * Initializes the board service instance and binds the infrastructure telemetry pipeline.
@@ -28,7 +31,7 @@ export class FirestoreBoardService extends BaseFirestoreService<KanbanEntities> 
    * Retrieves a single verified board entity structure by its unique identifier.
    * Returns the hydrated instance or null when no records match the criteria.
    */
-  public async getBoardProfile(uid: string): Promise<KanbanEntities | null> {
+  public async getBoardProfile(uid: string): Promise<AppKanbanEntities | null> {
     return this.getById(uid);
   }
 
@@ -36,7 +39,7 @@ export class FirestoreBoardService extends BaseFirestoreService<KanbanEntities> 
    * Retrieves all active boards globally available within the application context.
    * Excludes records marked with soft deletion state attributes.
    */
-  public async getAllActiveBoards(): Promise<KanbanEntities[]> {
+  public async getAllActiveBoards(): Promise<AppKanbanEntities[]> {
     return this.getMany({
       filters: {
         isDeleted: false,
@@ -49,8 +52,8 @@ export class FirestoreBoardService extends BaseFirestoreService<KanbanEntities> 
    * and persists the new board entity, returning the created document with its generated uid.
    */
   public async createBoard(
-    rawBoardData: Omit<KanbanEntities, 'uid'>
-  ): Promise<KanbanEntities> {
+    rawBoardData: KanbanCreatePayload
+  ): Promise<AppKanbanEntities> {
     return this.create(rawBoardData);
   }
 
@@ -60,7 +63,7 @@ export class FirestoreBoardService extends BaseFirestoreService<KanbanEntities> 
    */
   public async updateBoard(
     uid: string,
-    updates: Partial<Omit<KanbanEntities, 'uid'>>
+    updates: Partial<KanbanCreatePayload>
   ): Promise<void> {
     return this.update(uid, updates);
   }

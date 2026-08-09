@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getBoardsQueryConfig } from '@/utils/loader';
-import type { KanbanEntities } from '../context/KanbanFormModal';
 
-export type BoardFilterMode = 'ALL' | 'MY_BOARDS' | 'SHARED_ACCESS';
+import type { AppKanbanEntities } from '@/types/appKanbanTypes';
+import type { BoardFilterMode } from '../types/workspaceTypes';
 
 /**
  * Custom hook managing the state of board collections with client-side filter projections.
@@ -15,20 +15,22 @@ export const useBoardsWorkflow = (
   const baseConfig = getBoardsQueryConfig(userUid || 'fallback');
 
   return useQuery({
-    // Spread the queryKey and queryFn from the shared config file
     ...baseConfig,
     enabled: !!userUid,
-    select: (boardsArray: KanbanEntities[]) => {
-      let filtered = boardsArray;
+    select: (boardsArray: AppKanbanEntities[]) => {
+      const filtered = boardsArray.filter((b) => {
+        if (filterMode === 'MY_BOARDS') {
+          return b.createdBy === userUid;
+        }
 
-      if (filterMode === 'MY_BOARDS') {
-        filtered = boardsArray.filter((b) => b.createdBy === userUid);
-      } else if (filterMode === 'SHARED_ACCESS') {
-        filtered = boardsArray.filter(
-          (b) =>
+        if (filterMode === 'SHARED_ACCESS') {
+          return (
             b.createdBy === userUid || userAccessibleColumnIds.includes(b.uid)
-        );
-      }
+          );
+        }
+
+        return true;
+      });
 
       return filtered.reduce<Record<string, string>>((acc, board) => {
         if (board.uid && board.title) {

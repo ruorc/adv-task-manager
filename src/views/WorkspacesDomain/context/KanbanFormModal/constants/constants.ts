@@ -1,7 +1,7 @@
 /**
  * A read-only object mapping application entity types.
  */
-export const EntityType = {
+export const EntityName = {
   BOARD: 'board',
   COLUMN: 'column',
   TASK: 'task',
@@ -26,23 +26,17 @@ export const EntityField = {
   ASSIGNEES: 'assignees',
   PARENT: 'parent',
   GRAND: 'grand',
-  UNASSIGNED_VALUE: 'UNASSIGNED',
 } as const;
 
 /**
  * Extracted union type representing valid application entity categories.
  */
-export type EntityType = (typeof EntityType)[keyof typeof EntityType];
+export type EntityType = (typeof EntityName)[keyof typeof EntityName];
 
 /**
  * Extracted union type representing available form states.
  */
-export type FormMode = (typeof FormMode)[keyof typeof FormMode];
-
-/**
- * Extracted union type representing keys used across entity data models.
- */
-export type EntityField = (typeof EntityField)[keyof typeof EntityField];
+export type FormModeType = (typeof FormMode)[keyof typeof FormMode];
 
 /**
  * A read-only dictionary providing standardized static UI localization text strings.

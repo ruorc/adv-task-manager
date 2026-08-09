@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { ConfirmContextType } from '../types/confirm';
+import type { ConfirmContextType } from '../types/confirmTypes';
 
 /**
  * Core React Context for managing async confirmation workflows.

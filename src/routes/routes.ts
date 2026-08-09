@@ -1,44 +1,39 @@
-/**
- * Global immutable application routing pathways registry.
- * Enforces compile-time literal boundaries to completely eliminate magic URL strings.
- */
+/** Global configuration routing pathways registry mapping raw system locations. */
 export const ROUTES = Object.freeze({
-  /** Primary entry root route pattern that automatically redirects to the main about landing view */
+  /** The primary core index path mapping root landing parameters. */
   ROOT: '/',
-  /** Presentation main landing view showcasing system target benchmarks and technology matrices */
+  /** The main application info presentation landing overview path. */
   ABOUT: '/about',
-  /** Protected workspaces context view rendering operator Kanban boards dashboards */
+  /** The protected workspace dashboard board aggregator portal view. */
   WORKSPACES: '/workspaces',
-  /** Structural workspace detail pattern rendering layout boundaries for a specific board */
+  /** The deep location path routing framework parameters targeting unique boards. */
   BOARD_DETAIL: '/workspaces/boards/:boardId',
-  /** Nested column profile template rendering localized card lists inside a single board */
+  /** The localized specific card holder layout nested path. */
   COLUMN_DETAIL: '/workspaces/columns/:columnId',
-  /** Deep-link task node template tracking final execution details, briefs and ownership metrics */
+  /** The definitive execution task summary profiling workspace view path. */
   TASK_DETAIL: '/workspaces/tasks/:taskId',
-  /** Deep-link fallback route capturing unmapped entry attempts for systemic resets */
+  /** The error fallback catchall redirection destination route layout path. */
   NOT_FOUND: '*',
-} as const);
+});
 
-/**
- * Type safety helper representing any valid layout route definition template from the ROUTES object.
- * Resolves to the raw path patterns used strictly during route registration.
- */
+/** Union collection of valid string literals mapped from the application routing system registry. */
 export type AppRoutePattern = (typeof ROUTES)[keyof typeof ROUTES];
 
-/**
- * Dynamic route path utility generators to prevent manual string interpolation across components.
- */
+/** Dynamic compilation utility functions generating valid system navigation location paths. */
 export const routeHelpers = Object.freeze({
-  /**
-   * Compiles a valid client-side navigation pathway directly targeting a unique board view.
-   */
-  boardDetail: (boardId: string): string => `/workspaces/boards/${boardId}`,
-  /**
-   * Compiles a valid client-side navigation pathway directly targeting a unique nested column view.
-   */
-  columnDetail: (columnId: string): string => `/workspaces/columns/${columnId}`,
-  /**
-   * Compiles a valid client-side navigation pathway directly targeting the final task profile execution page.
-   */
-  taskDetail: (taskId: string): string => `/workspaces/tasks/${taskId}`,
-} as const);
+  /** Builds the runtime client path pattern for a board view. */
+  boardDetail: (
+    /** The target identification key string value of the active board. */
+    boardId: string
+  ): string => `/workspaces/boards/${boardId}`,
+  /** Builds the runtime client path pattern for a column view. */
+  columnDetail: (
+    /** The target identification key string value of the active column. */
+    columnId: string
+  ): string => `/workspaces/columns/${columnId}`,
+  /** Builds the runtime client path pattern for a task view. */
+  taskDetail: (
+    /** The target identification key string value of the active task. */
+    taskId: string
+  ): string => `/workspaces/tasks/${taskId}`,
+});

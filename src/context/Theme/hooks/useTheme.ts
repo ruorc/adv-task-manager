@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { ThemeContext } from '../context/ThemeContext';
 
-import type { ThemeContextType } from '../types/theme';
+import type { ThemeContextType } from '../types/themeTypes';
 
 /**
  * Safe consumer hook providing direct type-safe access to the global active theme context space.

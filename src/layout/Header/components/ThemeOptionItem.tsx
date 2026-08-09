@@ -7,31 +7,47 @@ import MenuItem from '@mui/material/MenuItem';
 import type { ThemeMode } from '@/context/Theme';
 
 /**
- * Structural contract defining interface configurations for an individual theme selection menu node.
+ * Typography configuration rules enforced across the primary string 
+ * layout text slot.
+ */
+interface PrimaryTextSlotStyles {
+  /** Typography structural token variant designation. */
+  readonly variant: 'body2';
+  /** Numeric weight scale modifier applied to the options text layout. */
+  readonly fontWeight: number;
+}
+
+/**
+ * Configuration options container holding property references 
+ * for child text slots.
+ */
+interface ThemeOptionTextSlots {
+  /** Target sub-component slot configuration mapping for the primary text node. */
+  readonly primary: PrimaryTextSlotStyles;
+}
+
+/**
+ * Structural contract defining interface configurations for an individual 
+ * theme selection menu node component.
  */
 interface ThemeOptionItemProps {
-  /** The compile-time immutable literal identifier representing the item targeted theme strategy */
+  /** The compile-time immutable literal identifier representing the item targeted theme strategy. */
   readonly themeOptionValue: ThemeMode;
-  /** Primary human-readable title label displayed to the operator */
+  /** Primary human-readable title label displayed to the operator. */
   readonly optionLabel: string;
-  /** Dynamic indicator flag verifying if this option matches the currently active system theme configuration */
+  /** Dynamic indicator flag verifying if this option matches the currently active system theme configuration. */
   readonly isOptionSelected: boolean;
-  /** Reusable Material UI SVG icon component class designated for visual grouping */
+  /** Reusable Material UI SVG icon component class designated for visual grouping. */
   readonly IconComponent: ComponentType<SvgIconProps>;
-  /** Callback dispatcher executing layout mutations upon explicit operator interaction triggers */
-  readonly onSelectTrigger: (targetTheme: ThemeMode) => void;
-  /** Direct closure handler designed to cleanly terminate the active menu popover state */
+  /** Callback dispatcher executing layout mutations upon explicit operator interaction triggers. */
+  readonly onSelectTrigger: (
+    /** The chosen theme configuration target string value. */
+    targetTheme: ThemeMode
+  ) => void;
+  /** Direct closure handler designed to cleanly terminate the active menu popover state. */
   readonly onCloseMenuTrigger: () => void;
-  /** SHARED performance layout cache referencing child element text sub-properties */
-  readonly slotTextProps: {
-    /** Target sub-component slot layout configuration mapping for the primary string node */
-    readonly primary: {
-      /** Typography structural token variant enforced across options */
-      readonly variant: 'body2';
-      /** Numeric scale metric controlling the primary typography weight quotient */
-      readonly fontWeight: number;
-    };
-  };
+  /** Shared layout configuration parameters mapping child typography properties. */
+  readonly slotTextProps: ThemeOptionTextSlots;
 }
 
 /**

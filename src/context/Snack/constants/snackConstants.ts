@@ -10,7 +10,7 @@ export const SNACKS = Object.freeze({
   WARNING: 'warning',
   /** Renders a neutral blue information banner delivering auxiliary systemic feedback */
   INFO: 'info',
-} as const);
+});
 
 /**
  * Compile-time union type of all supported notification severity levels.
@@ -25,4 +25,9 @@ export const DEFAULT_SNACK_SEVERITY: SnackSeverity = SNACKS.INFO;
 /**
  * Total timeline duration in milliseconds a single notification stays visible before decaying.
  */
-export const SNACK_DISPLAY_DURATION = 4000 as const;
+export const SNACK_DISPLAY_DURATION = 4000;
+
+/**
+ * Duration of the entrance and exit animations in milliseconds.
+ */
+export const ANIMATION_DURATION = 250;

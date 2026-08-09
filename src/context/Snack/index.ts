@@ -1,11 +1,7 @@
 import { SnackProvider } from './providers/SnackProvider';
 import { useSnack } from './hooks/useSnack';
-import type { SnackContextProps } from './types/snack';
+import type { SnackContextProps } from './types/snackTypes';
 
-/**
- * Public structural core entry contract exporting orchestrated notification components,
- * reactive context consumers, and strongly typed definition layouts.
- */
 export {
   /** Centralized Infrastructure Provider managing floating notification alert queues via Material UI tokens */
   SnackProvider,

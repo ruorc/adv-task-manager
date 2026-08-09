@@ -3,7 +3,10 @@ import type {
   QueryDocumentSnapshot,
 } from 'firebase/firestore';
 
-import type { BaseServiceLogger, JoiSchemaValidator } from './types';
+import type {
+  BaseServiceLogger,
+  JoiSchemaValidator,
+} from '../types/firestoreTypes';
 
 /**
  * Decoupled factory assembling strongly typed Firestore converters backed by Joi runtimes.

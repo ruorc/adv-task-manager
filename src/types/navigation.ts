@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
 /**
  * Common layout parameter state schema passed into active navigation elements.
@@ -25,7 +25,7 @@ export interface NavigationItem {
   /** Human-readable navigation title label rendered inside the interactive control */
   readonly label: string;
   /** Router-managed abstraction component wrapping the operational navigation target anchor link */
-  readonly LinkComponent: ComponentType<LinkComponentProps>;
+  readonly LinkComponent: FC<LinkComponentProps>;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface NavigationItem {
  */
 export interface NavigationRegistry {
   /** Injected route factory link bound strictly to the application root pathway for logo controls */
-  readonly rootLink: ComponentType<LinkComponentProps>;
+  readonly rootLink: FC<LinkComponentProps>;
   /** Complete immutable collection containing abstract navigation configurations for the main menu */
   readonly links: readonly NavigationItem[];
   /** Optional reactive action node injected dynamically into the sticky infrastructure toolbar */

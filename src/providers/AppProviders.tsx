@@ -5,9 +5,12 @@ import { GenericAuthProvider } from '@/context/Auth';
 import { ThemeProvider } from '@/context/Theme';
 import { ConfirmProvider } from '@/context/Confirm';
 import { SnackProvider } from '@/context/Snack';
-import { AuthModalProvider, type ReadonlyAuthForm } from '@/context/AuthModal';
+import { AuthModalProvider } from '@/context/AuthModal';
 import { firebaseAuthService } from '@/firebase/services/FirebaseAuthService';
 import { queryClient } from '@/utils/queryClient';
+
+import type { ReadonlyAuthForm } from '@/context/AuthModal';
+import type { LoginPayload, RegistrationPayload } from '@/types/appUserTypes';
 
 /**
  * Structural communication contract specifying properties required to initialize
@@ -26,9 +29,9 @@ export const AppProviders = ({ children }: AppProvidersProps): JSX.Element => {
   const handleAuthSubmission = useCallback(
     async (data: ReadonlyAuthForm, isRegister: boolean): Promise<void> => {
       if (isRegister) {
-        await firebaseAuthService.register(data);
+        await firebaseAuthService.register(data as RegistrationPayload);
       } else {
-        await firebaseAuthService.login(data);
+        await firebaseAuthService.login(data as LoginPayload);
       }
     },
     []

@@ -1,41 +1,25 @@
-import { AUTH_MODES } from '../constants/authModalConstants';
+import type { RegistrationPayload } from '@/types/appUserTypes';
+import type { AuthModeType } from '../constants/authModalConstants';
+
+export type { AuthModeType };
 
 /**
- * Valid operational modes for the authentication workflow (e.g., login or registration).
+ * Subset of registration payload fields that are strictly mandatory during
+ * account creation but remain optional within the underlying UI input forms.
  */
-export type AuthModeType = (typeof AUTH_MODES)[keyof typeof AUTH_MODES];
+type OptionalFormFields = Pick<RegistrationPayload, 'firstName' | 'lastName'>;
 
 /**
  * Immutable credentials payload captured from the authentication forms.
  */
-export interface ReadonlyAuthForm {
-  /** The unique email address provided by the user. */
-  readonly email: string;
-  /** The account password credentials. */
-  readonly password: string;
+export interface ReadonlyAuthForm extends Omit<
+  RegistrationPayload,
+  keyof OptionalFormFields
+> {
+  /** Optional first name of the registering user. */
+  readonly firstName?: RegistrationPayload['firstName'];
+  /** Optional last name of the registering user. */
+  readonly lastName?: RegistrationPayload['lastName'];
   /** Optional password confirmation used exclusively during registration. */
   readonly confirmPassword?: string;
-  /** Optional first name of the registering user. */
-  readonly firstName?: string;
-  /** Optional last name of the registering user. */
-  readonly lastName?: string;
-}
-
-/**
- * Configuration and lifecycle management properties for rendering the authentication modal dialog.
- */
-export interface AuthModalProps {
-  /** Controls the visibility state of the authentication modal. */
-  readonly isOpen: boolean;
-  /** Callback triggered to request closing the modal interface. */
-  readonly onClose: () => void;
-  /** Optional callback executed immediately after a successful authentication event. */
-  readonly onAuthSuccess?: () => void;
-  /** Optional default mode the form should display upon opening. */
-  readonly initialMode?: AuthModeType;
-  /** Asynchronous handler delegating the credential payload submission to parent architectures. */
-  readonly onSubmitAction: (
-    data: ReadonlyAuthForm,
-    isRegister: boolean
-  ) => Promise<void>;
 }

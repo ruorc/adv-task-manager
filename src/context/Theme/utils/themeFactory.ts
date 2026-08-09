@@ -2,7 +2,7 @@ import { createTheme, type Theme as MuiTheme } from '@mui/material/styles';
 
 import { DESIGN_TOKENS, THEMES } from '../constants/themeConstants';
 
-import type { ResolvedThemeMode } from '../types/theme';
+import type { ResolvedThemeMode } from '../types/themeTypes';
 
 /**
  * Module augmentation expanding native Material UI palette structures to support custom shimmering tokens.

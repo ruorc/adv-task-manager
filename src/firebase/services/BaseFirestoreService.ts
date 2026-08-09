@@ -18,7 +18,7 @@ import type {
   BaseServiceLogger,
   CollectionQueryParams,
   JoiSchemaValidator,
-} from './types';
+} from '../types/firestoreTypes';
 
 /**
  * Abstract domain controller providing standard operational blueprints for individual collections.

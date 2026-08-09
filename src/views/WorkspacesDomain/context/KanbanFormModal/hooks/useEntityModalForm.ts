@@ -5,21 +5,28 @@ import { joiResolver } from '@hookform/resolvers/joi';
 
 import { sysLogger } from '@/utils/logger';
 import { useAuth } from '@/context/Auth/hooks/useAuth';
-import { EntityField, EntityType } from '../constants/constants';
-import { entityValidationSchema } from '../schemas/validationSchema';
+import { EntityField, EntityName } from '../constants/constants';
+import { entityValidationSchema } from '../schemas/entityValidationSchema';
 import {
   resolveInitialValues,
   buildSubmissionPayload,
 } from '../utils/entityFormHelpers';
 
-import type { KanbanEntities, UniversalEntityModalProps } from '../types/types';
+import type {
+  AppKanbanEntities,
+  KanbanCreatePayload,
+} from '@/types/appKanbanTypes';
+import type {
+  ReadonlyKanbanForm,
+  UniversalEntityModalProps,
+} from '../types/kanbanTypes';
 
-const logger = sysLogger.forModule('FirebaseAuthService');
+const logger = sysLogger.forModule('useEntityModalForm');
 
 /**
  * Properties for the UseEntityModalForm hook, derived from the universal modal props.
  */
-export type UseEntityModalFormProps = Omit<
+type UseEntityModalFormProps = Omit<
   UniversalEntityModalProps,
   'availableUsers' | 'availableBoards'
 >;
@@ -36,17 +43,16 @@ export const useEntityModalForm = ({
   initialData,
   availableColumns = {},
 }: UseEntityModalFormProps) => {
-  const { uid, operatorName } = useAuth();
+  const { user } = useAuth();
+  const currentOperatorUid = user?.uid;
+  const currentOperatorName = user?.displayName;
+
   const { boardId, columnId } = useParams<{
-    boardId?: string;
-    columnId?: string;
+    readonly boardId?: string;
+    readonly columnId?: string;
   }>();
 
-  /**
-   * Pre-calculate initial form values synchronously to guarantee state stability during the first rendering pass.
-   * This completely prevents hooks from initializing field elements with undefined states.
-   */
-  const computedDefaultValues = useMemo(() => {
+  const computedDefaultValues = useMemo<ReadonlyKanbanForm>(() => {
     return resolveInitialValues(
       mode,
       entityType,
@@ -57,13 +63,13 @@ export const useEntityModalForm = ({
     );
   }, [mode, entityType, initialData, boardId, columnId, availableColumns]);
 
-  const formMethods = useForm<KanbanEntities>({
+  const formMethods = useForm<ReadonlyKanbanForm>({
     resolver: joiResolver(entityValidationSchema, {
       allowUnknown: true,
       stripUnknown: true,
     }),
     context: { entityType },
-    defaultValues: computedDefaultValues as KanbanEntities,
+    defaultValues: computedDefaultValues,
     mode: 'onChange',
   });
 
@@ -71,20 +77,18 @@ export const useEntityModalForm = ({
 
   const watchedParent = useWatch({ control, name: EntityField.PARENT });
 
-  /** Synchronize external dynamic modifications or initial data payload update cycles correctly */
   useEffect(() => {
     if (isOpen) {
-      reset(computedDefaultValues as KanbanEntities);
+      reset(computedDefaultValues);
     }
   }, [isOpen, computedDefaultValues, reset]);
 
-  /** Coordinate target task hierarchy structures when form elements undergo active parent alterations */
   useEffect(() => {
-    if (entityType !== EntityType.TASK) {
+    if (entityType !== EntityName.TASK) {
       return;
     }
 
-    /** Ensure availableColumns collection is valid and watchedParent is a usable lookup key string before querying properties */
+    // Ensure availableColumns collection is valid and watchedParent is a usable lookup key string before querying properties
     const isColumnLookupValid =
       typeof watchedParent === 'string' &&
       availableColumns !== null &&
@@ -100,8 +104,8 @@ export const useEntityModalForm = ({
     }
   }, [watchedParent, entityType, availableColumns, boardId, setValue]);
 
-  const handleSubmitForm = (data: KanbanEntities) => {
-    if (!uid || !operatorName) {
+  const handleSubmitForm = (data: ReadonlyKanbanForm) => {
+    if (!currentOperatorUid || !currentOperatorName) {
       logger.error(
         'Submission blocked: Cannot resolve active user session context.'
       );
@@ -113,12 +117,23 @@ export const useEntityModalForm = ({
       data,
       mode,
       entityType,
-      uid,
-      operatorName,
+      currentOperatorUid,
+      currentOperatorName,
       initialData
     );
 
-    onSubmit(finalPayload);
+    if (finalPayload === null) {
+      onClose();
+
+      return;
+    }
+
+    if ('uid' in finalPayload && finalPayload.uid) {
+      onSubmit(finalPayload as AppKanbanEntities);
+    } else {
+      onSubmit(finalPayload as KanbanCreatePayload);
+    }
+
     onClose();
   };
 

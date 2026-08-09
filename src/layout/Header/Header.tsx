@@ -32,10 +32,6 @@ interface HeaderProps {
   readonly onThemeChange: (theme: ThemeMode) => void;
 }
 
-/**
- * Shared presentation styling configuration governing branding logo button elements
- * within the primary header navigation tier.
- */
 const LOGO_BUTTON_STYLES = {
   textTransform: 'none' as const,
   fontWeight: 600,

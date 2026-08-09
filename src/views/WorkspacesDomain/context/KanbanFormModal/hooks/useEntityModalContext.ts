@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { EntityModalContext } from '../context/UniversalEntityModalContext';
 
-import type { ModalContextValue } from '../types/types';
+import type { ModalContextValue } from '../types/kanbanTypes';
 
 /**
  * Hook to access the universal entity modal form API.

@@ -9,7 +9,7 @@ import {
 
 import { AuthContext } from '../context/AuthContext';
 
-import type { AppUser } from '@/context/UserEntity/userTypes';
+import type { AppUser } from '@/types/appUserTypes';
 import type { AuthService } from '@/context/Auth/types/authServiceTypes';
 import type { AuthContextProps } from '../types/authContextTypes';
 
@@ -19,7 +19,6 @@ import type { AuthContextProps } from '../types/authContextTypes';
 interface GenericAuthProviderProps {
   /** Concrete implementation of the authentication contract used for session management. */
   readonly authService: AuthService;
-
   /** React node hierarchy that requires access to the authentication state context. */
   readonly children: ReactNode;
 }

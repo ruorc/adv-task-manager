@@ -2,7 +2,7 @@ import { createContext } from 'react';
 
 import { THEMES } from '../constants/themeConstants';
 
-import type { ThemeMode, ThemeContextType } from '../types/theme';
+import type { ThemeMode, ThemeContextType } from '../types/themeTypes';
 
 /**
  * React context storing the active client-side visual theme preference configuration profile.

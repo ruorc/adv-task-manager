@@ -5,16 +5,17 @@ import TextField from '@mui/material/TextField';
 import type { ReadonlyAuthForm } from '../types/authFormTypes';
 
 /**
- * Structural contract defining properties for the reusable authentication text field.
+ * Structural configuration properties for initializing and rendering 
+ * a reusable authentication input text field component.
  */
 interface AuthTextFieldProps {
-  /** The name of the field, corresponding to the form's data structure. */
+  /** The unique registration name key matching the form data schema. */
   readonly name: keyof ReadonlyAuthForm;
-  /** The label text displayed above the input field. */
+  /** The descriptive text displayed above or inside the input container. */
   readonly label: string;
-  /** The type of input expected (e.g., text, email, password). Defaults to 'text'. */
+  /** The semantic behavior profile determining visual masking of input data. */
   readonly type?: 'text' | 'email' | 'password';
-  /** Indicates whether the field is mandatory for form submission. Defaults to false. */
+  /** Dictates whether empty field values trigger constraint validation errors. */
   readonly required?: boolean;
 }
 

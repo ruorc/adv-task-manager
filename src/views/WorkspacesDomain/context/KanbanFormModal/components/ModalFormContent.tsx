@@ -14,7 +14,7 @@ import PersonIcon from '@mui/icons-material/Person';
 
 import {
   EntityField,
-  EntityType,
+  EntityName,
   FormMode,
   UI_TEXT,
 } from '../constants/constants';
@@ -80,11 +80,11 @@ export const ModalFormContent = ({
 
     let HeaderIcon = AssignmentIcon;
 
-    if (entityType === EntityType.BOARD) {
+    if (entityType === EntityName.BOARD) {
       HeaderIcon = DashboardIcon;
     }
 
-    if (entityType === EntityType.COLUMN) {
+    if (entityType === EntityName.COLUMN) {
       HeaderIcon = ViewColumnIcon;
     }
 
@@ -130,7 +130,7 @@ export const ModalFormContent = ({
             icon: PersonIcon,
           })}
 
-          {entityType === EntityType.COLUMN &&
+          {entityType === EntityName.COLUMN &&
             createElement(FormSelectField, {
               name: EntityField.PARENT,
               control: control,
@@ -140,7 +140,7 @@ export const ModalFormContent = ({
               entityTypeContext: entityType,
             })}
 
-          {entityType === EntityType.TASK &&
+          {entityType === EntityName.TASK &&
             createElement(FormSelectField, {
               name: EntityField.PARENT,
               control: control,

@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { SnackContextProps } from '../types/snack';
+import type { SnackContextProps } from '../types/snackTypes';
 
 /**
  * React context storing the active client-side transient notification alerts dispatchers.

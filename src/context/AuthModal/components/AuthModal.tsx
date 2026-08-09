@@ -9,7 +9,29 @@ import CloseIcon from '@mui/icons-material/Close';
 import { AuthModalForm } from './AuthModalForm';
 import { AUTH_MODES } from '../constants/authModalConstants';
 
-import type { AuthModalProps, AuthModeType } from '../types/authFormTypes';
+import type { ReadonlyAuthForm, AuthModeType } from '../types/authFormTypes';
+
+/**
+ * Configuration parameters and lifecycle management triggers 
+ * for rendering the authentication modal viewport.
+ */
+interface AuthModalProps {
+  /** Controls the visibility state of the authentication modal. */
+  readonly isOpen: boolean;
+  /** Callback triggered to request closing the modal interface. */
+  readonly onClose: () => void;
+  /** Optional callback executed immediately after a successful authentication event. */
+  readonly onAuthSuccess?: () => void;
+  /** Optional default mode the form should display upon opening. */
+  readonly initialMode?: AuthModeType;
+  /** Asynchronous handler delegating the credential payload submission to parent architectures. */
+  readonly onSubmitAction: (
+    /** The validated authentication form values matching the active schema. */
+    data: ReadonlyAuthForm,
+    /** Flag explicitly distinguishing registration workflows from login paths. */
+    isRegister: boolean
+  ) => Promise<void>;
+}
 
 /**
  * Standard Identity Orchestration Modal Container Component.

@@ -1,45 +1,57 @@
 import type { LogConfig, LogLevel } from '@/config/logger';
 
-export type { LogConfig, LogLevel };
+/**
+ * Shared configuration presets and operational severity levels
+ * for the logger application module.
+ */
+export type {
+  /** Configuration settings object defining global logger behavior. */
+  LogConfig,
+  /** Allowed severity thresholds for classifying application log events. */
+  LogLevel,
+};
 
 /**
- * Structured context and metadata envelope for diagnostic records.
+ * Structured contextual metadata assigned to diagnostic log records
+ * for telemetry monitoring.
  */
 export interface LogContext {
-  /**
-   * Identifier of the architectural module or service originating the entry.
-   */
+  /** The specific application module or layer emitting the log. */
   readonly module?: string;
-
-  /**
-   * Key-value dictionary of metrics used for analytical indexing.
-   */
+  /** Key-value metadata tags applied to index and filter logs. */
   readonly tags?: Readonly<Record<string, string | number | boolean>>;
-
-  /**
-   * Dynamic property dictionary for capturing arbitrary execution telemetry parameters.
-   */
+  /** Dynamic structured payload properties capturing runtime execution parameters. */
   readonly [key: string]: unknown;
 }
 
 /**
- * Localized logger interface bound to a specific application module boundary.
+ * Logger client interface restricted to a single application
+ * module execution boundary.
  */
 export interface ModuleLogger {
-  /** Tracks telemetry operational milestones or execution checkpoints. */
+  /** Logs standard system behavior and milestone execution checkpoints. */
   readonly info: (
+    /** The main description message text for the log entry. */
     message: string,
+    /** Optional context attributes omitting the predefined module name. */
     context?: Omit<LogContext, 'module'>
   ) => void;
-  /** Records recoverable application degradation signals or anomalies. */
+
+  /** Logs non-fatal unexpected anomalies or system degradation warnings. */
   readonly warn: (
+    /** The main description message text for the log entry. */
     message: string,
+    /** Optional context attributes omitting the predefined module name. */
     context?: Omit<LogContext, 'module'>
   ) => void;
-  /** Captures critical system state exceptions and routes them to monitoring. */
+
+  /** Logs critical application errors and tracking exceptions. */
   readonly error: (
+    /** The main description message text for the log entry. */
     message: string,
+    /** The raw error metadata, instance, or unknown exception object. */
     error?: unknown,
+    /** Optional context attributes omitting the predefined module name. */
     context?: Omit<LogContext, 'module'>
   ) => void;
 }

@@ -1,5 +1,6 @@
 import { AuthModalProvider } from './providers/AuthModalProvider';
 import { useAuthModal } from './hooks/useAuthModal';
+import { userFieldsValidation } from './schemas/userFieldValidation';
 
 import type {
   AuthModalContextProps,
@@ -7,22 +8,22 @@ import type {
 } from './types/authContextTypes';
 import type { ReadonlyAuthForm } from './types/authFormTypes';
 
-/**
- * Public structural core entry contract exporting orchestrated authentication components,
- * react context consumers, and strongly typed definition layouts.
- */
+/** Core authentication infrastructure exports including providers and active context triggers. */
 export {
-  /** Centralized Infrastructure Provider managing global authentication window visibility states */
+  /** Component providing authentication modal state and actions. */
   AuthModalProvider,
-  /** Standard telemetry interceptor hook extracting active authorization modal operational vectors */
+  /** Hook to access and control the authentication modal state. */
   useAuthModal,
+  /** Predefined evaluation boundaries validation rules mapping user fields. */
+  userFieldsValidation,
 };
 
+/** Shared domain contract definitions, input structures, and validation schemas. */
 export type {
-  /** Structural contract defining actionable operations exposed by the identity modal context stream */
+  /** Properties and methods available in the authentication modal context. */
   AuthModalContextProps,
-  /** Structural communication contract specifying core initialization parameters for the context wrapper */
+  /** Properties required by the authentication modal provider component. */
   AuthModalProviderProps,
-  /** Structural blueprint enforcing immutable authentication form parameters for login and registration processes */
+  /** Immutable credentials payload captured from the authentication forms. */
   ReadonlyAuthForm,
 };

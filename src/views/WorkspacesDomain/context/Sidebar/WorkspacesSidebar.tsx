@@ -13,7 +13,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useAuth } from '@/context/Auth';
 import { useSidebarModal } from './hooks/useSidebarModal';
 import { useSidebarDelete } from './hooks/useSidebarDelete';
-import { EntityType } from '../KanbanFormModal/constants/constants';
+import { EntityName } from '../KanbanFormModal/constants/constants';
 import { UI_TEXTS } from './constants/texts';
 import { ConnectedEntityModal } from '../../components/ConnectedEntityModal';
 import { SidebarCreateButton } from './components/SidebarCreateButton';
@@ -85,36 +85,36 @@ export const WorkspacesSidebar = (): JSX.Element => {
             label={UI_TEXTS.NEW_BOARD}
             icon={<AddBoxIcon />}
             color="primary"
-            onClick={() => openCreateModal(EntityType.BOARD)}
+            onClick={() => openCreateModal(EntityName.BOARD)}
           />
           <SidebarActionGroup
             isVisible={Boolean(boardId && !columnId && !taskId && isOwner)}
-            onEdit={() => openEditModal(EntityType.BOARD)}
-            onDelete={() => handleDelete(EntityType.BOARD)}
+            onEdit={() => openEditModal(EntityName.BOARD)}
+            onDelete={() => handleDelete(EntityName.BOARD)}
           />
 
           <SidebarCreateButton
             label={UI_TEXTS.NEW_COLUMN}
             icon={<ViewColumnIcon />}
             color="secondary"
-            onClick={() => openCreateModal(EntityType.COLUMN)}
+            onClick={() => openCreateModal(EntityName.COLUMN)}
           />
           <SidebarActionGroup
             isVisible={Boolean(columnId && !taskId && isOwner)}
-            onEdit={() => openEditModal(EntityType.COLUMN)}
-            onDelete={() => handleDelete(EntityType.COLUMN)}
+            onEdit={() => openEditModal(EntityName.COLUMN)}
+            onDelete={() => handleDelete(EntityName.COLUMN)}
           />
 
           <SidebarCreateButton
             label={UI_TEXTS.NEW_TASK}
             icon={<AssignmentIcon />}
             color="success"
-            onClick={() => openCreateModal(EntityType.TASK)}
+            onClick={() => openCreateModal(EntityName.TASK)}
           />
           <SidebarActionGroup
             isVisible={Boolean(taskId && isOwner)}
-            onEdit={() => openEditModal(EntityType.TASK)}
-            onDelete={() => handleDelete(EntityType.TASK)}
+            onEdit={() => openEditModal(EntityName.TASK)}
+            onDelete={() => handleDelete(EntityName.TASK)}
           />
         </Stack>
       </Box>

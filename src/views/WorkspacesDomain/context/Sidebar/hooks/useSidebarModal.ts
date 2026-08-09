@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 import {
-  EntityType,
+  EntityName,
   FormMode,
 } from '../../KanbanFormModal/constants/constants';
 
@@ -12,7 +12,7 @@ interface ModalConfig {
   /** The operational workflow state, managing creation or modification. */
   mode: FormMode;
   /** The target architectural classification of the active system entity. */
-  entityType: EntityType;
+  entityType: EntityName;
 }
 
 /**
@@ -23,10 +23,10 @@ export const useSidebarModal = () => {
 
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
     mode: FormMode.CREATE,
-    entityType: EntityType.BOARD,
+    entityType: EntityName.BOARD,
   });
 
-  const openCreateModal = useCallback((entityType: EntityType) => {
+  const openCreateModal = useCallback((entityType: EntityName) => {
     setModalConfig({
       mode: FormMode.CREATE,
       entityType,
@@ -34,7 +34,7 @@ export const useSidebarModal = () => {
     setIsModalOpen(true);
   }, []);
 
-  const openEditModal = useCallback((entityType: EntityType) => {
+  const openEditModal = useCallback((entityType: EntityName) => {
     setModalConfig({
       mode: FormMode.EDIT,
       entityType,

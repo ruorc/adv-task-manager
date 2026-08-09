@@ -1,9 +1,10 @@
 import { type JSX } from 'react';
 import { Dialog } from '@mui/material';
 
-import type { UniversalEntityModalProps } from '../types/types';
 import { EntityModalProvider } from '../providers/UniversalEntityModalProvider';
 import { ModalFormContent } from '../components/ModalFormContent';
+
+import type { UniversalEntityModalProps } from '../types/kanbanTypes';
 
 /**
  * Universal Dialog wrapper implementing isolated context architecture and atomic layouts.

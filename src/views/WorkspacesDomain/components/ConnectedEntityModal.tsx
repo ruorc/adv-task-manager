@@ -5,31 +5,31 @@ import { sysLogger } from '@/utils/logger';
 import { useSnack } from '@/context/Snack';
 import { useAuth } from '@/context/Auth';
 import { firestoreBoardService } from '@/firebase/services/FirestoreBoardService';
-import {
-  UniversalEntityModal,
-  EntityType,
-  FormMode,
-} from '../context/KanbanFormModal';
+
 import { useAllUsers } from '../hooks/useAllUsers';
 import { useBoardsWorkflow } from '../hooks/useBoardsWorkflow';
+import { EntityName, FormMode, UniversalEntityModal } from '../context/KanbanFormModal';
 
-import type { KanbanEntities } from '../context/KanbanFormModal';
+import type { AppKanbanEntities, KanbanCreatePayload } from '@/types/appKanbanTypes';
+import type { EntityType, FormModeType } from '../context/KanbanFormModal';
 
-const logger = sysLogger.forModule('FirebaseAuthService');
+const logger = sysLogger.forModule('ConnectedEntityModal');
 
 /**
- * Properties for the ConnectedEntityModal component.
+ * Structural communication contract specifying core initialization parameters 
+ * and visibility handlers for the connected entity modal component.
  */
 interface ConnectedEntityModalProps {
   /** Controls the visibility state of the connected entity modal dialog. */
-  isOpen: boolean;
+  readonly isOpen: boolean;
   /** Callback trigger invoked to safely close the active modal layout. */
-  onClose: () => void;
+  readonly onClose: () => void;
   /** Operational workflow configuration setting the form state to creation or modification. */
-  mode: FormMode;
+  readonly mode: FormModeType;
   /** Target architectural category classification for the processed entity metadata. */
-  entityType: EntityType;
+  readonly entityType: EntityType;
 }
+
 
 /**
  * A connected dialog component wrapper that hooks into routing parameters and mutation pipelines to manage the target entity layout state.
@@ -42,23 +42,24 @@ export const ConnectedEntityModal = ({
 }: ConnectedEntityModalProps): JSX.Element => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
   const { boardId, columnId, taskId } = useParams<{
-    boardId?: string;
-    columnId?: string;
-    taskId?: string;
+    readonly boardId?: string;
+    readonly columnId?: string;
+    readonly taskId?: string;
   }>();
 
   /** Extract the current active session authentication status from the core security provider */
   const { user } = useAuth();
   const currentOperatorUid = user?.uid;
 
-  const initialData: Partial<KanbanEntities> | undefined = undefined;
+  // ИСПРАВИТЬ: Временное использование const для удовлетворения ESLint prefer-const
+  const initialData: Partial<AppKanbanEntities> | undefined = undefined;
 
   if (mode === FormMode.EDIT) {
-    if (entityType === EntityType.BOARD && boardId) {
+    if (entityType === EntityName.BOARD && boardId) {
       // initialData = useAppSelector(state => selectBoardById(state, boardId));
-    } else if (entityType === EntityType.COLUMN && columnId) {
+    } else if (entityType === EntityName.COLUMN && columnId) {
       // initialData = useAppSelector(state => selectColumnById(state, columnId));
-    } else if (entityType === EntityType.TASK && taskId) {
+    } else if (entityType === EntityName.TASK && taskId) {
       // initialData = useAppSelector(state => selectTaskById(state, taskId));
     }
   }
@@ -74,16 +75,24 @@ export const ConnectedEntityModal = ({
 
   const availableColumns: Record<string, string> = {};
 
+  /**
+   * Processes form submission by identifying the runtime operational mode.
+   * Leverages type guards ensuring correct data payload distribution to storage layers.
+   */
   const handleSaveData = useCallback(
-    async (data: KanbanEntities) => {
+    async (data: AppKanbanEntities | KanbanCreatePayload) => {
       try {
-        await firestoreBoardService.createBoard(data);
-
-        showSuccessSnack('Successfully saved!');
+        if ('uid' in data && data.uid) {
+          await firestoreBoardService.updateBoard(data.uid, data);
+          showSuccessSnack('Successfully updated!');
+        } else {
+          await firestoreBoardService.createBoard(data as KanbanCreatePayload);
+          showSuccessSnack('Successfully created!');
+        }
+        
         onClose();
       } catch (error) {
         logger.error('Firestore transaction crashed', error);
-
         showErrorSnack('Data not saved');
       }
     },

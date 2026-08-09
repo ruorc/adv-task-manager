@@ -12,9 +12,12 @@ import { sysLogger } from '@/utils/logger';
 import { FIREBASE_AUTH_ERRORS } from '../constants/firebaseConstants';
 import { firestoreUserService } from './FirestoreUserService';
 
-import type { ReadonlyAuthForm } from '@/context/AuthModal';
 import type { AuthService } from '@/context/Auth';
-import type { AppUser } from '@/context/UserEntity';
+import type {
+  AppUser,
+  LoginPayload,
+  RegistrationPayload,
+} from '@/types/appUserTypes';
 
 const logger = sysLogger.forModule('FirebaseAuthService');
 
@@ -26,7 +29,7 @@ export class FirebaseAuthService implements AuthService {
   /**
    * Authenticates an existing user using email and password credentials.
    */
-  public async login(credentials: ReadonlyAuthForm): Promise<UserCredential> {
+  public async login(credentials: LoginPayload): Promise<UserCredential> {
     try {
       return await signInWithEmailAndPassword(
         auth,
@@ -42,27 +45,17 @@ export class FirebaseAuthService implements AuthService {
       throw this.handleAuthError(error);
     }
   }
-
   /**
    * Registers a new user account, enforces strict non-empty first and last names,
    * constructs the display name strictly as the combination of first and last names,
    * provisions a synchronized profile document in Firestore, and rolls back on failure.
    */
   public async register(
-    registrationData: ReadonlyAuthForm
+    registrationData: Required<RegistrationPayload>
   ): Promise<UserCredential> {
     const email = registrationData.email.trim();
-    const firstName = registrationData.firstName?.trim() ?? '';
-    const lastName = registrationData.lastName?.trim() ?? '';
-
-    if (!firstName) {
-      throw new Error('First name cannot be empty.');
-    }
-
-    if (!lastName) {
-      throw new Error('Last name cannot be empty.');
-    }
-
+    const firstName = registrationData.firstName.trim();
+    const lastName = registrationData.lastName.trim();
     const displayName = `${firstName} ${lastName}`;
 
     let userCredential: UserCredential | null = null;

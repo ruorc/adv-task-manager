@@ -1,12 +1,4 @@
 /**
- * Immutable domain runtime operation modes.
- */
-export const AUTH_MODES = {
-  LOGIN: 'login',
-  REGISTER: 'register',
-} as const;
-
-/**
  * Interface copy fragments and semantic telemetry messaging structures.
  * Binds directly to the global localized dictionary configuration layout.
  */
@@ -19,3 +11,16 @@ export const AUTH_TEXTS = {
   ERROR_MATCH: 'The validation credential confirmation matrix does not match.',
   ERROR_GENERIC: 'An unhandled error degraded the security transport stream.',
 };
+
+/**
+ * Immutable domain runtime operation modes.
+ */
+export const AUTH_MODES = {
+  LOGIN: 'login',
+  REGISTER: 'register',
+} as const;
+
+/**
+ * Valid operational modes for the authentication workflow (e.g., login or registration).
+ */
+export type AuthModeType = (typeof AUTH_MODES)[keyof typeof AUTH_MODES];

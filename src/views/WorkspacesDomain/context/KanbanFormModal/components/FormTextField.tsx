@@ -1,38 +1,37 @@
 import { type JSX } from 'react';
 import {
   Controller,
+  get,
   type Control,
   type FieldErrors,
   type Path,
 } from 'react-hook-form';
 import { TextField } from '@mui/material';
 
-import type { EntityField } from '../constants/constants';
-import type { KanbanEntities } from '../types/types';
+import type { ReadonlyKanbanForm } from '../types/kanbanTypes';
 
 /**
- * Properties for the FormTextField component.
+ * Configuration properties required to initialize and render 
+ * a standardized text input form field.
  */
 interface FormTextFieldProps {
   /** The specific entity field identifier managed by this input. */
-  name: EntityField & Path<KanbanEntities>;
+  readonly name: Path<ReadonlyKanbanForm>;
   /** The react-hook-form control object used to register and track the input state. */
-  control: Control<KanbanEntities>;
+  readonly control: Control<ReadonlyKanbanForm>;
   /** Object containing active form validation errors to display error messages. */
-  errors: FieldErrors<KanbanEntities>;
+  readonly errors: FieldErrors<ReadonlyKanbanForm>;
   /** The human-readable text label displayed over the input field. */
-  label: string;
+  readonly label: string;
   /** Optional flag to mark the field as required both visually and for native constraints. */
-  required?: boolean;
+  readonly required?: boolean;
   /** Optional flag to transform the input into a multi-line text area. */
-  multiline?: boolean;
+  readonly multiline?: boolean;
   /** Optional configuration setting the number of visible rows when multiline is active. */
-  rows?: number;
+  readonly rows?: number;
 }
 
-/**
- * A standardized input text field component integrated with react-hook-form and Material UI styling.
- */
+/** Standardized text input field component integrated with react-hook-form. */
 export const FormTextField = ({
   name,
   control,
@@ -42,18 +41,14 @@ export const FormTextField = ({
   multiline = false,
   rows,
 }: FormTextFieldProps): JSX.Element => {
+  const fieldError = get(errors, name);
+
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => {
-        const errorEntry = errors[name];
-        const errorMessage =
-          errorEntry &&
-          'message' in errorEntry &&
-          typeof errorEntry.message === 'string'
-            ? errorEntry.message
-            : undefined;
+        const errorMessage = fieldError?.message ? String(fieldError.message) : undefined;
 
         return (
           <TextField
@@ -63,7 +58,7 @@ export const FormTextField = ({
             required={required}
             multiline={multiline}
             rows={rows}
-            error={!!errorEntry}
+            error={!!fieldError}
             helperText={errorMessage}
           />
         );

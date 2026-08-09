@@ -6,12 +6,13 @@ import Typography from '@mui/material/Typography';
 import { useAuthModal } from '@/context/AuthModal';
 
 /**
- * Pure presentation contract representing access controls and session triggers.
+ * Pure presentation contract representing access controls 
+ * and session state triggers for the user account view.
  */
 interface AccountActionsProps {
-  /** Name of the currently authenticated operator, if any */
+  /** Name of the currently authenticated operator, or null for guests. */
   readonly authenticatedOperatorName: string | null;
-  /** Callback proxy engineered to cleanly dispatch logout requests */
+  /** Callback proxy engineered to cleanly dispatch logout requests. */
   readonly onLogout: () => void;
 }
 

@@ -42,7 +42,6 @@ const createLinkComponent = (to: string) => {
 export const RouterContainer = (): JSX.Element => {
   const navigation = useNavigation();
 
-  /** Intercept ongoing background thread transactions and loader evaluations across boundaries */
   const isNavigating = navigation.state === 'loading';
 
   const globalNavigationRegistry = useMemo<NavigationRegistry>(

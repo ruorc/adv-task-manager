@@ -11,7 +11,7 @@ import {
 import { ConfirmContext } from '../context/ConfirmContext';
 import { ConfirmModal } from '../components/ConfirmModal';
 
-import type { ConfirmOptions } from '../types/confirm';
+import type { ConfirmOptions } from '../types/confirmTypes';
 
 /**
  * Structural contract defining properties expected by the global confirmation lifecycle coordinator.

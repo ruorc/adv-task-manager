@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { THEME_KEY, DEFAULT_THEME } from '../constants/themeConstants';
 import { isValidTheme } from '../context/ThemeContext';
 
-import type { ThemeMode } from '../types/theme';
+import type { ThemeMode } from '../types/themeTypes';
 
 /**
  * Internal hook coordinating cross-tab theme state replication via storage events.
