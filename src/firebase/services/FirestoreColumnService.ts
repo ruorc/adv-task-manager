@@ -1,18 +1,22 @@
 import { sysLogger } from '@/utils/logger';
-import { columnEntitySchema } from '@/schemas/column';
+import { appKanbanEntitiesSchema } from '@/schemas/appKanbanSchema';
 import { BaseFirestoreService } from './BaseFirestoreService';
-import type { ColumnEntity } from '@/context/Column';
+
+import type {
+  AppKanbanEntities,
+  KanbanCreatePayload,
+} from '@/types/appKanbanTypes';
 
 /**
  * Singleton instance manager coordinating database persistence,
  * runtime schema validation, and hierarchy queries for board columns.
  */
-export class FirestoreColumnService extends BaseFirestoreService<ColumnEntity> {
+export class FirestoreColumnService extends BaseFirestoreService<AppKanbanEntities> {
   /** Root database collection target configuration for column documents. */
   protected collectionName = 'columns';
 
   /** Active runtime evaluation validation blueprints backing column structures. */
-  protected schema = columnEntitySchema;
+  protected schema = appKanbanEntitiesSchema;
 
   /**
    * Initializes the column service instance and binds the infrastructure telemetry pipeline.
@@ -24,10 +28,20 @@ export class FirestoreColumnService extends BaseFirestoreService<ColumnEntity> {
   }
 
   /**
+   * Retrieves a single verified column entity structure by its unique identifier.
+   * Returns the hydrated instance or null when no records match the criteria.
+   */
+  public async getColumn(uid: string): Promise<AppKanbanEntities | null> {
+    return this.getById(uid);
+  }
+
+  /**
    * Retrieves all operational columns nested inside a target parent board.
    * Filters out soft-deleted structures automatically.
    */
-  public async getColumnsByBoard(boardUid: string): Promise<ColumnEntity[]> {
+  public async getColumnsByBoard(
+    boardUid: string
+  ): Promise<AppKanbanEntities[]> {
     return this.getMany({
       filters: {
         parent: boardUid,
@@ -37,20 +51,12 @@ export class FirestoreColumnService extends BaseFirestoreService<ColumnEntity> {
   }
 
   /**
-   * Retrieves a single verified column entity structure by its unique identifier.
-   * Returns the hydrated instance or null when no records match the criteria.
-   */
-  public async getColumn(uid: string): Promise<ColumnEntity | null> {
-    return this.getById(uid);
-  }
-
-  /**
    * Generates a unique identifier in the database, validates the structural blueprint,
    * and persists the new column entity, returning the created document with its generated uid.
    */
   public async createColumn(
-    rawColumnData: Omit<ColumnEntity, 'uid'>
-  ): Promise<ColumnEntity> {
+    rawColumnData: KanbanCreatePayload
+  ): Promise<AppKanbanEntities> {
     return this.create(rawColumnData);
   }
 
@@ -60,7 +66,7 @@ export class FirestoreColumnService extends BaseFirestoreService<ColumnEntity> {
    */
   public async updateColumn(
     uid: string,
-    updates: Partial<Omit<ColumnEntity, 'uid'>>
+    updates: Partial<KanbanCreatePayload>
   ): Promise<void> {
     return this.update(uid, updates);
   }

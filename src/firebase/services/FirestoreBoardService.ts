@@ -1,6 +1,6 @@
 import { sysLogger } from '@/utils/logger';
-import { BaseFirestoreService } from './BaseFirestoreService';
 import { appKanbanEntitiesSchema } from '@/schemas/appKanbanSchema';
+import { BaseFirestoreService } from './BaseFirestoreService';
 
 import type {
   AppKanbanEntities,

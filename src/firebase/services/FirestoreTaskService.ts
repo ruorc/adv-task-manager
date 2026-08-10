@@ -1,18 +1,22 @@
 import { sysLogger } from '@/utils/logger';
-import { taskEntitySchema } from '@/schemas/task';
+import { appKanbanEntitiesSchema } from '@/schemas/appKanbanSchema';
 import { BaseFirestoreService } from './BaseFirestoreService';
-import type { TaskEntity } from '@/context/Task';
+
+import type {
+  AppKanbanEntities,
+  KanbanCreatePayload,
+} from '@/types/appKanbanTypes';
 
 /**
  * Singleton instance manager coordinating database persistence,
  * runtime schema validation, and multi-level ancestor queries for task items.
  */
-export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
+export class FirestoreTaskService extends BaseFirestoreService<AppKanbanEntities> {
   /** Root database collection target configuration for task documents. */
   protected collectionName = 'tasks';
 
   /** Active runtime evaluation validation blueprints backing task structures. */
-  protected schema = taskEntitySchema;
+  protected schema = appKanbanEntitiesSchema;
 
   /**
    * Initializes the task service instance and binds the infrastructure telemetry pipeline.
@@ -27,7 +31,9 @@ export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
    * Retrieves tasks directly assigned to a specific column parent.
    * Filters out soft-deleted records automatically.
    */
-  public async getTasksByColumn(columnUid: string): Promise<TaskEntity[]> {
+  public async getTasksByColumn(
+    columnUid: string
+  ): Promise<AppKanbanEntities[]> {
     return this.getMany({
       filters: {
         parent: columnUid,
@@ -40,7 +46,7 @@ export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
    * Retrieves all tasks belonging to an entire board workspace using the top-level grand ancestor reference.
    * Filters out soft-deleted records automatically.
    */
-  public async getTasksByBoard(boardUid: string): Promise<TaskEntity[]> {
+  public async getTasksByBoard(boardUid: string): Promise<AppKanbanEntities[]> {
     return this.getMany({
       filters: {
         grand: boardUid,
@@ -53,7 +59,7 @@ export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
    * Retrieves a single verified task entity structure by its unique identifier.
    * Returns the hydrated instance or null when no records match the criteria.
    */
-  public async getTask(uid: string): Promise<TaskEntity | null> {
+  public async getTask(uid: string): Promise<AppKanbanEntities | null> {
     return this.getById(uid);
   }
 
@@ -62,8 +68,8 @@ export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
    * and persists the new task entity, returning the created document with its generated uid.
    */
   public async createTask(
-    rawTaskData: Omit<TaskEntity, 'uid'>
-  ): Promise<TaskEntity> {
+    rawTaskData: KanbanCreatePayload
+  ): Promise<AppKanbanEntities> {
     return this.create(rawTaskData);
   }
 
@@ -73,7 +79,7 @@ export class FirestoreTaskService extends BaseFirestoreService<TaskEntity> {
    */
   public async updateTask(
     uid: string,
-    updates: Partial<Omit<TaskEntity, 'uid'>>
+    updates: Partial<KanbanCreatePayload>
   ): Promise<void> {
     return this.update(uid, updates);
   }
