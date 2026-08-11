@@ -4,7 +4,7 @@ import { useParams } from 'react-router';
 import { joiResolver } from '@hookform/resolvers/joi';
 
 import { sysLogger } from '@/utils/logger';
-import { useAuth } from '@/context/Auth/hooks/useAuth';
+import { useRequiredAuth } from '@/context/Auth';
 import { EntityField, EntityName } from '../constants/constants';
 import { entityValidationSchema } from '../schemas/entityValidationSchema';
 import {
@@ -46,9 +46,8 @@ export const useEntityModalForm = ({
   availableUsers = {},
   availableColumns = {},
 }: UseEntityModalFormProps) => {
-  const { user } = useAuth();
-  const currentOperatorUid = user?.uid;
-  const currentOperatorName = user?.displayName;
+  const { uid: currentOperatorUid, operatorName: currentOperatorName } =
+    useRequiredAuth();
 
   const { boardId, columnId } = useParams<{
     readonly boardId?: string;

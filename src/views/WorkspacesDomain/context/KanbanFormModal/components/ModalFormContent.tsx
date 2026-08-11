@@ -1,4 +1,4 @@
-import React, { type JSX, createElement } from 'react';
+import { type JSX, type ReactNode, createElement } from 'react';
 import {
   DialogTitle,
   DialogContent,
@@ -71,7 +71,7 @@ export const ModalFormContent = ({
     })
   );
 
-  const getModalHeader = (): React.ReactNode => {
+  const getModalHeader = (): ReactNode => {
     const prefix =
       mode === FormMode.CREATE
         ? UI_TEXT.TITLE_PREFIX_CREATE

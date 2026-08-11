@@ -4,9 +4,6 @@ import { entityValidationSchema } from './schemas/entityValidationSchema';
 
 import type { EntityType, FormModeType } from './types/kanbanTypes';
 
-/**
- * Public domain entry contract exporting orchestrated Kanban view layout elements and execution constants.
- */
 export {
   /** Core string literal registry defining valid structural component classification types. */
   EntityName,
@@ -18,9 +15,6 @@ export {
   entityValidationSchema,
 };
 
-/**
- * Shared domain contracts and validation logic configurations.
- */
 export type {
   /** Structural identification categorization boundaries applied to board objects. */
   EntityType,

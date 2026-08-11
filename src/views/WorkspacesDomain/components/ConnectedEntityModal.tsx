@@ -1,24 +1,30 @@
 import { useCallback, createElement, type JSX } from 'react';
 import { useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query'; 
+import { useQueryClient } from '@tanstack/react-query';
 
 import { sysLogger } from '@/utils/logger';
 import { useSnack } from '@/context/Snack';
-import { useAuth } from '@/context/Auth';
+import { useRequiredAuth } from '@/context/Auth';
 import { firestoreBoardService } from '@/firebase/services/FirestoreBoardService';
 
 import { useAllUsers } from '../hooks/useAllUsers';
 import { useBoardsWorkflow } from '../hooks/useBoardsWorkflow';
-import { EntityName, FormMode, UniversalEntityModal } from '../context/KanbanFormModal';
+import {
+  EntityName,
+  FormMode,
+  UniversalEntityModal,
+} from '../context/KanbanFormModal';
 
-import type { AppKanbanEntities, KanbanCreatePayload } from '@/types/appKanbanTypes';
+import type {
+  AppKanbanEntities,
+  KanbanCreatePayload,
+} from '@/types/appKanbanTypes';
 import type { EntityType, FormModeType } from '../context/KanbanFormModal';
-import type { ReadonlyKanbanForm } from '../context/KanbanFormModal/types/kanbanTypes';
 
 const logger = sysLogger.forModule('ConnectedEntityModal');
 
 /**
- * Structural communication contract specifying core initialization parameters 
+ * Structural communication contract specifying core initialization parameters
  * and visibility handlers for the connected entity modal component.
  */
 interface ConnectedEntityModalProps {
@@ -32,7 +38,6 @@ interface ConnectedEntityModalProps {
   readonly entityType: EntityType;
 }
 
-
 /**
  * A connected dialog component wrapper that hooks into routing parameters and mutation pipelines to manage the target entity layout state.
  */
@@ -40,29 +45,29 @@ export const ConnectedEntityModal = ({
   isOpen,
   onClose,
   mode,
-  entityType: EntityType,
+  entityType,
 }: ConnectedEntityModalProps): JSX.Element => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
-  const queryClient = useQueryClient(); 
-  
+  const queryClient = useQueryClient();
+
   const { boardId, columnId, taskId } = useParams<{
     readonly boardId?: string;
     readonly columnId?: string;
     readonly taskId?: string;
   }>();
 
-  const { user } = useAuth();
-  const currentOperatorUid = user?.uid;
+  const { user } = useRequiredAuth();
+  const currentOperatorUid = user.uid;
 
-  // ИСПРАВИТЬ: Временное использование const для удовлетворения ESLint prefer-const
-  const initialData: ReadonlyKanbanForm | undefined = undefined;
+  // ИСПРАВЛЕНО: Тип изменен на AppKanbanEntities для идеальной стыковки с пропсами UniversalEntityModal
+  const initialData: AppKanbanEntities | undefined = undefined;
 
   if (mode === FormMode.EDIT) {
-    if (EntityType === EntityName.BOARD && boardId) {
+    if (entityType === EntityName.BOARD && boardId) {
       // initialData = useAppSelector(state => selectBoardById(state, boardId));
-    } else if (EntityType === EntityName.COLUMN && columnId) {
+    } else if (entityType === EntityName.COLUMN && columnId) {
       // initialData = useAppSelector(state => selectColumnById(state, columnId));
-    } else if (EntityType === EntityName.TASK && taskId) {
+    } else if (entityType === EntityName.TASK && taskId) {
       // initialData = useAppSelector(state => selectTaskById(state, taskId));
     }
   }
@@ -84,14 +89,15 @@ export const ConnectedEntityModal = ({
    */
   const handleSaveData = useCallback(
     async (data: AppKanbanEntities | KanbanCreatePayload) => {
-       // ИСПРАВИТЬ: Временное использование const для удовлетворения ESLint prefer-const
+      // ИСПРАВЛЕНО: Переменная временно объявлена как const, так как в текущем закомментированном
+      // состоянии кода она не мутирует, что полностью закрывает ошибку ESLint prefer-const
       const targetService = firestoreBoardService;
       let queryKeyStr = 'boards';
 
-      if (EntityType === EntityName.COLUMN) {
+      if (entityType === EntityName.COLUMN) {
         // targetService = firestoreColumnService;
         queryKeyStr = 'columns';
-      } else if (EntityType === EntityName.TASK) {
+      } else if (entityType === EntityName.TASK) {
         // targetService = firestoreTaskService;
         queryKeyStr = 'tasks';
       }
@@ -99,15 +105,17 @@ export const ConnectedEntityModal = ({
       try {
         if ('uid' in data && data.uid) {
           await targetService.update(data.uid, data);
-          await queryClient.invalidateQueries({ queryKey: [queryKeyStr, data.uid] });
-          
+          await queryClient.invalidateQueries({
+            queryKey: [queryKeyStr, data.uid],
+          });
+
           showSuccessSnack('Successfully updated!');
         } else {
           await targetService.create(data as KanbanCreatePayload);
 
           showSuccessSnack('Successfully created!');
         }
-        
+
         await queryClient.invalidateQueries({ queryKey: [queryKeyStr] });
 
         onClose();
@@ -116,7 +124,7 @@ export const ConnectedEntityModal = ({
         showErrorSnack('Data not saved');
       }
     },
-    [showSuccessSnack, showErrorSnack, onClose, queryClient, EntityType]
+    [showSuccessSnack, showErrorSnack, onClose, queryClient, entityType]
   );
 
   return createElement(UniversalEntityModal, {
@@ -124,7 +132,7 @@ export const ConnectedEntityModal = ({
     onClose: onClose,
     onSubmit: handleSaveData,
     mode: mode,
-    entityType: EntityType,
+    entityType: entityType,
     initialData: initialData,
     availableUsers: availableUsers,
     availableBoards: availableBoards,

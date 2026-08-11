@@ -2,15 +2,16 @@ import { useCallback } from 'react';
 import { useConfirm } from '@/context/Confirm';
 import { useSnack } from '@/context/Snack';
 import { UI_TEXTS } from '../constants/texts';
-import { EntityName } from '../../KanbanFormModal';
 
-import type { KanbanEntities } from '../../KanbanFormModal';
 import { sysLogger } from '@/utils/logger';
+import { EntityName, type EntityType } from '../../KanbanFormModal';
+
+import type { AppKanbanEntities } from '@/types/appKanbanTypes';
 
 const logger = sysLogger.forModule('useSidebarDelete');
 
 /** Extended layout record describing entity fields along with structural emptiness parameters. */
-type EntityData = Partial<KanbanEntities> & {
+type EntityData = AppKanbanEntities & {
   /** Optional flag specifying whether the current target entity container holds nested items. */
   isEmpty?: boolean;
 };
@@ -23,7 +24,7 @@ export const useSidebarDelete = (currentEntity: EntityData) => {
   const { showSuccessSnack, showErrorSnack } = useSnack();
 
   const handleDelete = useCallback(
-    async (entityType: EntityName) => {
+    async (entityType: EntityType) => {
       const isContainerEntity =
         entityType === EntityName.BOARD || entityType === EntityName.COLUMN;
 

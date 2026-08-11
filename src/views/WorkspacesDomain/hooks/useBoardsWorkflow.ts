@@ -6,17 +6,17 @@ import type { BoardFilterMode } from '../types/workspaceTypes';
 
 /**
  * Custom hook managing the state of board collections with client-side filter projections.
+ * Enforces strict presence of the user identifier to protect data boundaries.
  */
 export const useBoardsWorkflow = (
-  userUid: string | undefined,
-  filterMode: BoardFilterMode = 'ALL',
-  userAccessibleColumnIds: string[] = []
+  userUid: string,
+  filterMode: BoardFilterMode = 'ALL'
 ) => {
-  const baseConfig = getBoardsQueryConfig(userUid || 'fallback');
+  const baseConfig = getBoardsQueryConfig(userUid);
 
   return useQuery({
     ...baseConfig,
-    enabled: !!userUid,
+    enabled: true,
     select: (boardsArray: AppKanbanEntities[]) => {
       const filtered = boardsArray.filter((b) => {
         if (filterMode === 'MY_BOARDS') {
@@ -25,7 +25,7 @@ export const useBoardsWorkflow = (
 
         if (filterMode === 'SHARED_ACCESS') {
           return (
-            b.createdBy === userUid || userAccessibleColumnIds.includes(b.uid)
+            b.createdBy !== userUid && b.assignees && userUid in b.assignees
           );
         }
 

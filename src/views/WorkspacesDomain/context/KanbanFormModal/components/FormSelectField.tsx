@@ -1,4 +1,4 @@
-import React, { type JSX } from 'react';
+import { type ComponentType, type JSX, type ReactNode } from 'react';
 import {
   Controller,
   get,
@@ -17,11 +17,11 @@ import {
   FormHelperText,
   Box,
 } from '@mui/material';
-import type { ReadonlyKanbanForm } from '../types/kanbanTypes';
 
+import type { KanbanFormState } from '../types/kanbanTypes';
 
 /**
- * Represents a key-value data structure for data rendering 
+ * Represents a key-value data structure for data rendering
  * within selection items.
  */
 interface SelectOption {
@@ -36,11 +36,11 @@ interface SelectOption {
  */
 interface FormSelectFieldProps {
   /** The specific entity field identifier managed by this input. */
-  readonly name: Path<ReadonlyKanbanForm>;
+  readonly name: Path<KanbanFormState>;
   /** The react-hook-form control object used to register and track the input state. */
-  readonly control: Control<ReadonlyKanbanForm>;
+  readonly control: Control<KanbanFormState>;
   /** Object containing active form validation errors to display error messages. */
-  readonly errors: FieldErrors<ReadonlyKanbanForm>;
+  readonly errors: FieldErrors<KanbanFormState>;
   /** The human-readable text label displayed over the input field. */
   readonly label: string;
   /** Array of formatted options available for selection. */
@@ -52,7 +52,7 @@ interface FormSelectFieldProps {
   /** Context identifier specifying which entity form is being rendered to construct unique accessibility IDs. */
   readonly entityTypeContext: string;
   /** Optional Material UI icon component to display next to the values. */
-  readonly icon?: React.ComponentType<{
+  readonly icon?: ComponentType<{
     /** Specific sizing scale override allocated to the icon element. */
     readonly fontSize?: 'small';
     /** UI action palette state applied to the icon element. */
@@ -78,7 +78,7 @@ export const FormSelectField = ({
 
   const renderSelectedValue = (
     selected: string | string[] | undefined
-  ): React.ReactNode => {
+  ): ReactNode => {
     if (!selected || (Array.isArray(selected) && selected.length === 0)) {
       return null;
     }
@@ -114,9 +114,11 @@ export const FormSelectField = ({
       control={control}
       render={({ field }) => {
         const isAssigneesField = name === 'assignees';
-        
+
         const selectValue: string | string[] = multiple
-          ? (Array.isArray(field.value) ? field.value : [])
+          ? Array.isArray(field.value)
+            ? field.value
+            : []
           : ((field.value as string) ?? '');
 
         const isMultipleArray = multiple && Array.isArray(selectValue);
@@ -139,9 +141,11 @@ export const FormSelectField = ({
                 const newValue = e.target.value;
 
                 field.onChange(
-                  multiple && Array.isArray(newValue) 
-                    ? newValue 
-                    : (newValue === '' ? null : newValue)
+                  multiple && Array.isArray(newValue)
+                    ? newValue
+                    : newValue === ''
+                      ? null
+                      : newValue
                 );
               }}
             >

@@ -1,23 +1,16 @@
-import { type JSX, type ReactNode } from 'react';
+import { type JSX } from 'react';
 
 import { EntityModalContext } from '../context/UniversalEntityModalContext';
 import { useEntityModalForm } from '../hooks/useEntityModalForm';
 
 import type {
   ModalContextValue,
-  UniversalEntityModalProps,
+  ModalProviderProps,
 } from '../types/kanbanTypes';
 
 /**
- * Properties for the EntityModalProvider component.
- */
-interface ModalProviderProps extends UniversalEntityModalProps {
-  /** The child React elements that require access to the synchronized modal form context. */
-  children: ReactNode;
-}
-
-/**
- * Stateful state machine container initializing validation context and managing values sync pipelines.
+ * Stateful state machine container initializing validation context
+ * and managing values synchronization pipelines.
  */
 export const EntityModalProvider = ({
   isOpen,
@@ -38,6 +31,7 @@ export const EntityModalProvider = ({
     mode,
     entityType,
     initialData,
+    availableUsers,
     availableColumns,
   });
 

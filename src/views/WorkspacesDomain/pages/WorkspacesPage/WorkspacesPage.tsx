@@ -1,68 +1,37 @@
-import { useState, type JSX } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CircularProgress,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { type JSX } from 'react';
+import { useSearchParams, useNavigate } from 'react-router';
+import { Box, Typography } from '@mui/material';
 
-import {
-  useBoardsWorkflow,
-  type BoardFilterMode,
-} from '../../hooks/useBoardsWorkflow';
+import { useRequiredAuth } from '@/context/Auth/hooks/useRequiredAuth';
+import { useBoardsWorkflow } from '../../hooks/useBoardsWorkflow';
+import { WorkspacesFilterTabs } from './components/WorkspacesFilterTabs';
+import { WorkspacesEmptyState } from './components/WorkspacesEmptyState';
+import { WorkspacesGrid } from './components/WorkspacesGrid';
+
+import { DataLifecycleWrapper } from '../shared/DataLifecycleWrapper';
+import type { BoardFilterMode } from '../../types/workspaceTypes';
+import { routeHelpers } from '@/routes';
 
 /**
- * Properties structure defined for the WorkspacesPage operational lifecycle.
+ * Main orchestrator catalog grid rendering all accessible board dashboard structures and filter lifecycle pipelines.
  */
-interface WorkspacesPageProps {
-  /** Optional temporary user identifier used during initial testing phases. */
-  currentUserUid?: string;
-}
+export const WorkspacesPage = (): JSX.Element => {
+  const { uid: userUid } = useRequiredAuth();
+  const navigate = useNavigate();
 
-/**
- * Main workspace directory catalog rendering all available system boards and filter navigation states.
- */
-export const WorkspacesPage = ({
-  currentUserUid,
-}: WorkspacesPageProps): JSX.Element => {
-  const userUid = currentUserUid || 'current-user-id-stub';
-  const [filterMode, setFilterMode] = useState<BoardFilterMode>('ALL');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentFilter =
+    (searchParams.get('filter') as BoardFilterMode) || 'ALL';
 
   const {
     data: boards = {},
     isLoading,
     isError,
-  } = useBoardsWorkflow(userUid, filterMode);
+  } = useBoardsWorkflow(userUid, currentFilter);
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <Typography color="error">
-          Failed to load workspaces. Please check network connectivity or try
-          again.
-        </Typography>
-      </Box>
-    );
-  }
+  const handleBoardNavigation = (uid: string): void => {
+    navigate(routeHelpers.boardDetail(uid));
+  };
 
   const hasNoBoards = Object.keys(boards).length === 0;
 
@@ -72,82 +41,19 @@ export const WorkspacesPage = ({
         Workspaces
       </Typography>
 
-      <Tabs
-        value={filterMode}
-        onChange={(_, newValue: BoardFilterMode) => setFilterMode(newValue)}
-        sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
-      >
-        <Tab label="All Boards" value="ALL" />
-        <Tab label="My Boards" value="MY_BOARDS" />
-        <Tab label="Shared Access" value="SHARED_ACCESS" />
-      </Tabs>
+      <WorkspacesFilterTabs
+        currentFilter={currentFilter}
+        onFilterChange={(newValue) => setSearchParams({ filter: newValue })}
+      />
 
-      {hasNoBoards ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '40vh',
-          }}
-        >
-          <Card
-            variant="outlined"
-            sx={{
-              maxWidth: 400,
-              textAlign: 'center',
-              backgroundColor: 'action.hover',
-              borderStyle: 'dashed',
-              borderRadius: 2,
-            }}
-          >
-            <CardContent
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 2,
-                py: 4,
-              }}
-            >
-              <InfoOutlinedIcon color="info" sx={{ fontSize: 40 }} />
-              <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
-                No boards found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {filterMode === 'ALL'
-                  ? 'There are no active boards in this workspace. Use the creation controls located in the sidebar to build your first board.'
-                  : 'No board criteria matching the active filter selection was found.'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-            gap: 2,
-          }}
-        >
-          {Object.entries(boards).map(([uid, title]) => (
-            <Card
-              key={uid}
-              variant="outlined"
-              sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 } }}
-            >
-              <CardContent>
-                <Typography variant="h6" component="h3">
-                  {title}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Open board management workflow
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      )}
+      <DataLifecycleWrapper
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={hasNoBoards}
+        emptyState={<WorkspacesEmptyState currentFilter={currentFilter} />}
+      >
+        <WorkspacesGrid boards={boards} onBoardSelect={handleBoardNavigation} />
+      </DataLifecycleWrapper>
     </Box>
   );
 };

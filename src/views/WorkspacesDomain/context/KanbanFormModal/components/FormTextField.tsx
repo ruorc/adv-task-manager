@@ -8,19 +8,19 @@ import {
 } from 'react-hook-form';
 import { TextField } from '@mui/material';
 
-import type { ReadonlyKanbanForm } from '../types/kanbanTypes';
+import type { KanbanFormState } from '../types/kanbanTypes';
 
 /**
- * Configuration properties required to initialize and render 
+ * Configuration properties required to initialize and render
  * a standardized text input form field.
  */
 interface FormTextFieldProps {
   /** The specific entity field identifier managed by this input. */
-  readonly name: Path<ReadonlyKanbanForm>;
+  readonly name: Path<KanbanFormState>;
   /** The react-hook-form control object used to register and track the input state. */
-  readonly control: Control<ReadonlyKanbanForm>;
+  readonly control: Control<KanbanFormState>;
   /** Object containing active form validation errors to display error messages. */
-  readonly errors: FieldErrors<ReadonlyKanbanForm>;
+  readonly errors: FieldErrors<KanbanFormState>;
   /** The human-readable text label displayed over the input field. */
   readonly label: string;
   /** Optional flag to mark the field as required both visually and for native constraints. */
@@ -48,7 +48,9 @@ export const FormTextField = ({
       name={name}
       control={control}
       render={({ field }) => {
-        const errorMessage = fieldError?.message ? String(fieldError.message) : undefined;
+        const errorMessage = fieldError?.message
+          ? String(fieldError.message)
+          : undefined;
 
         return (
           <TextField

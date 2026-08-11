@@ -3,16 +3,18 @@ import { useState, useCallback } from 'react';
 import {
   EntityName,
   FormMode,
-} from '../../KanbanFormModal/constants/constants';
+  type EntityType,
+  type FormModeType,
+} from '../../KanbanFormModal';
 
 /**
  * Configuration schema defining the state operational metadata for active dialog views.
  */
 interface ModalConfig {
   /** The operational workflow state, managing creation or modification. */
-  mode: FormMode;
+  mode: FormModeType;
   /** The target architectural classification of the active system entity. */
-  entityType: EntityName;
+  entityType: EntityType;
 }
 
 /**
@@ -26,7 +28,7 @@ export const useSidebarModal = () => {
     entityType: EntityName.BOARD,
   });
 
-  const openCreateModal = useCallback((entityType: EntityName) => {
+  const openCreateModal = useCallback((entityType: EntityType) => {
     setModalConfig({
       mode: FormMode.CREATE,
       entityType,
@@ -34,7 +36,7 @@ export const useSidebarModal = () => {
     setIsModalOpen(true);
   }, []);
 
-  const openEditModal = useCallback((entityType: EntityName) => {
+  const openEditModal = useCallback((entityType: EntityType) => {
     setModalConfig({
       mode: FormMode.EDIT,
       entityType,

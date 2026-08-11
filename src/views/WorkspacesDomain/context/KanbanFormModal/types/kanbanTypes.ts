@@ -6,27 +6,20 @@ import type {
   KanbanCreatePayload,
 } from '@/types/appKanbanTypes';
 import type { EntityType, FormModeType } from '../constants/constants';
+import type { ReactNode } from 'react';
 
-/**
- * Extracted union type representing valid application entity categories.
- */
-export type { EntityType };
+export type {
+  /** Structural definitions and fields representing a workspace entity. */
+  EntityType,
+  /** TypeScript type restraining form state to valid operational modes. */
+  FormModeType,
+};
 
-/**
- * Extracted union type representing available form states.
- */
-export type { FormModeType };
-
-/**
- * Represents a simplified user profile within the application context.
- */
+/** Simplified user profile blueprint extracted from the core application user record. */
 export type User = Pick<AppUser, 'uid' | 'displayName'>;
 
-/**
- * Unified functional contract for processing Kanban entity form mutations
- * across variable payload structures.
- */
-type EntitySubmitAction = {
+/** Unified functional contract for processing Kanban entity form mutations across variable payload structures. */
+export type EntitySubmitAction = {
   /** Submits the full entity object including unique identifier coordinates. */
   (
     /** The complete existing Kanban entity instance profile. */
@@ -39,11 +32,8 @@ type EntitySubmitAction = {
   ): void;
 };
 
-/**
- * Structural configuration data properties required to initialize
- * any Kanban management modal viewport.
- */
-interface BaseEntityModalSharedProps {
+/** Structural configuration data properties required to initialize any Kanban management modal viewport. */
+export interface BaseEntityModalSharedProps {
   /** The current active operational stage layout state. */
   readonly mode: FormModeType;
   /** The target model type category being processed. */
@@ -56,20 +46,14 @@ interface BaseEntityModalSharedProps {
   readonly availableColumns: Record<string, string>;
 }
 
-/**
- * Action dispatchers strictly managing data submission
- * and processing behavior within the form layer.
- */
-interface BaseEntityFormActionProps {
+/** Action dispatchers strictly managing data submission and processing behavior within the form layer. */
+export interface BaseEntityFormActionProps {
   /** Executed when data boundaries pass schema parsing. */
   readonly onSubmit: EntitySubmitAction;
 }
 
-/**
- * Infrastructure action properties managing the window runtime lifecycle
- * and explicit destructive actions.
- */
-interface BaseEntityModalActionProps {
+/** Infrastructure action properties managing the window runtime lifecycle and explicit destructive actions. */
+export interface BaseEntityModalActionProps {
   /** Triggers the safe disposal of the active dialog box. */
   readonly onClose: () => void;
   /** Dispatches an archival workflow processing the chosen card identifier. */
@@ -79,19 +63,19 @@ interface BaseEntityModalActionProps {
   ) => Promise<void>;
 }
 
-/**
- * Client-side form input layout model matching creation parameters
- * with an optional record identity for updating current states.
- */
+/** Client-side form input layout model matching creation parameters with an optional record identity for updating current states. */
 export interface ReadonlyKanbanForm extends KanbanCreatePayload {
   /** The specific identity key included exclusively during item update procedures. */
   readonly uid?: AppKanbanEntities['uid'];
 }
 
-/**
- * Universal layout and orchestration configuration blueprint
- * controlling top-level dialog wrapper scopes.
- */
+/** Specialized validation shape representing mutable form inputs where relation metrics are collected into basic string arrays. */
+export interface KanbanFormState extends Omit<ReadonlyKanbanForm, 'assignees'> {
+  /** Roster tracking target unique identification keys of selected team workers. */
+  readonly assignees: string[];
+}
+
+/** Universal layout and orchestration configuration blueprint controlling top-level dialog wrapper scopes. */
 export interface UniversalEntityModalProps
   extends
     BaseEntityModalSharedProps,
@@ -100,26 +84,23 @@ export interface UniversalEntityModalProps
   /** Toggles the visible rendering boundary state. */
   readonly isOpen: boolean;
   /** Baseline fallback configuration metrics populating the fields. */
-  readonly initialData?: ReadonlyKanbanForm;
+  readonly initialData?: AppKanbanEntities;
 }
 
-/**
- * Shared state context value broadcasting internal management hooks
- * alongside core behavioral rules.
- */
+/** Properties for the EntityModalProvider component wrapper. */
+export interface ModalProviderProps extends UniversalEntityModalProps {
+  /** The child React elements that require access to the synchronized modal form context. */
+  readonly children: ReactNode;
+}
+
+/** Shared state context value broadcasting internal management hooks alongside core behavioral rules. */
 export interface ModalContextValue
   extends BaseEntityModalSharedProps, BaseEntityModalActionProps {
   /** Reactive form handlers binding fields to the schema layout. */
-  readonly formMethods: UseFormReturn<ReadonlyKanbanForm>;
+  readonly formMethods: UseFormReturn<KanbanFormState>;
   /** Action dispatcher triggered when formatting and submitting valid data fields. */
-  readonly handleSubmitForm: EntitySubmitAction;
-}
-
-/**
- * Specialized validation shape representing mutable form inputs where
- * relation metrics are collected into basic string arrays.
- */
-export interface KanbanFormState extends Omit<ReadonlyKanbanForm, 'assignees'> {
-  /** Roster tracking target unique identification keys of selected team workers. */
-  readonly assignees: string[];
+  readonly handleSubmitForm: (
+    /** Reactive state object collection containing validated user modifications. */
+    data: KanbanFormState
+  ) => void;
 }

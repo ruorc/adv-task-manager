@@ -61,8 +61,7 @@ export const getRouterConfig = (
         lazy: async () => {
           const { WorkspacesLayout } =
             await import('@/views/WorkspacesDomain/WorkspacesLayout');
-          const { AuthWallPage } =
-            await import('@/views/WorkspacesDomain/pages/AuthWallPage');
+          const { AuthWallPage } = await import('@/views/AuthWallPage');
 
           return {
             Component: createProtectedRouteComponent(

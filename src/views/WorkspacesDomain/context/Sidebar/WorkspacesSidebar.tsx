@@ -1,5 +1,6 @@
-import { type JSX } from 'react';
+import { type JSX, useMemo, createElement } from 'react';
 import { useParams } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -10,7 +11,8 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 
-import { useAuth } from '@/context/Auth';
+import { getBoardsQueryConfig } from '@/utils/loader';
+import { useRequiredAuth } from '@/context/Auth/hooks/useRequiredAuth';
 import { useSidebarModal } from './hooks/useSidebarModal';
 import { useSidebarDelete } from './hooks/useSidebarDelete';
 import { EntityName } from '../KanbanFormModal/constants/constants';
@@ -18,26 +20,78 @@ import { UI_TEXTS } from './constants/texts';
 import { ConnectedEntityModal } from '../../components/ConnectedEntityModal';
 import { SidebarCreateButton } from './components/SidebarCreateButton';
 import { SidebarActionGroup } from './components/SidebarActionGroup';
+import { useBoardsWorkflow } from '../../hooks/useBoardsWorkflow';
+
+import type { AppKanbanEntities } from '@/types/appKanbanTypes';
 
 /**
- * Sidebar component for the workspaces view, providing global entity filtering actions, entity creation entry points, and owner management controls.
+ * Sidebar component for the workspaces view, providing global entity filtering actions,
+ * entity creation entry points, and owner management controls.
  */
 export const WorkspacesSidebar = (): JSX.Element => {
-  const { uid } = useAuth();
+  const { uid, operatorName } = useRequiredAuth();
   const { boardId, columnId, taskId } = useParams<{
-    boardId?: string;
-    columnId?: string;
-    taskId?: string;
+    readonly boardId?: string;
+    readonly columnId?: string;
+    readonly taskId?: string;
   }>();
 
-  // Заглушка текущей сущности для проверки прав (isOwner)
-  const currentEntity = {
-    uid: 'MOCK_ENTITY_ID',
-    title: UI_TEXTS.FALLBACK_ENTITY_TITLE,
-    createdBy: 'MOCK_USER_ID',
-    isEmpty: true,
-  };
-  const isOwner = Boolean(uid && currentEntity?.createdBy === uid);
+  const queryClient = useQueryClient();
+
+  /** Triggers the remote data pipeline to keep the TanStack React Query cache warm. */
+  useBoardsWorkflow(uid, 'ALL');
+
+  const currentEntity = useMemo<
+    (AppKanbanEntities & { readonly isEmpty: boolean }) | null
+  >(() => {
+    if (taskId) {
+      return {
+        uid: taskId,
+        title: 'Active Task Name',
+        description: '',
+        createdBy: uid,
+        createdByName: operatorName,
+        assignees: {},
+        isCompleted: false,
+        isDeleted: false,
+        isEmpty: true,
+      };
+    }
+
+    if (columnId) {
+      return {
+        uid: columnId,
+        title: 'Active Column Name',
+        description: '',
+        createdBy: uid,
+        createdByName: operatorName,
+        assignees: {},
+        isCompleted: false,
+        isDeleted: false,
+        isEmpty: true,
+      };
+    }
+
+    if (boardId) {
+      const { queryKey } = getBoardsQueryConfig(uid);
+      const cachedBoards =
+        queryClient.getQueryData<AppKanbanEntities[]>(queryKey);
+      const activeBoard = cachedBoards?.find((b) => b.uid === boardId);
+
+      if (!activeBoard) {
+        return null;
+      }
+
+      return {
+        ...activeBoard,
+        isEmpty: true,
+      };
+    }
+
+    return null;
+  }, [boardId, columnId, taskId, queryClient, uid, operatorName]);
+
+  const isOwner = Boolean(currentEntity && currentEntity.createdBy === uid);
 
   const {
     isModalOpen,
@@ -46,7 +100,20 @@ export const WorkspacesSidebar = (): JSX.Element => {
     openEditModal,
     closeModal,
   } = useSidebarModal();
-  const { handleDelete } = useSidebarDelete(currentEntity);
+
+  const { handleDelete } = useSidebarDelete(
+    currentEntity || {
+      uid: '',
+      title: '',
+      createdBy: '',
+      isCompleted: false,
+      isDeleted: false,
+      assignees: {},
+      description: '',
+      createdByName: '',
+      isEmpty: true,
+    }
+  );
 
   return (
     <>
@@ -119,12 +186,12 @@ export const WorkspacesSidebar = (): JSX.Element => {
         </Stack>
       </Box>
 
-      <ConnectedEntityModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        mode={modalConfig.mode}
-        entityType={modalConfig.entityType}
-      />
+      {createElement(ConnectedEntityModal, {
+        isOpen: isModalOpen,
+        onClose: closeModal,
+        mode: modalConfig.mode,
+        entityType: modalConfig.entityType,
+      })}
     </>
   );
 };

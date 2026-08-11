@@ -1,5 +1,6 @@
 import { GenericAuthProvider } from './providers/AuthProvider';
 import { useAuth } from './hooks/useAuth';
+import { useRequiredAuth } from './hooks/useRequiredAuth';
 
 import type { AuthContextProps } from './types/authContextTypes';
 import type { AuthService } from './types/authServiceTypes';
@@ -9,6 +10,8 @@ export {
   GenericAuthProvider,
   /** Hook to access the current authentication context values, user profile data, and session actions. */
   useAuth,
+  /** Explicit structural validation barrier enforcing complete presence of identity data records without fallback states. */
+  useRequiredAuth,
 };
 
 export type {
