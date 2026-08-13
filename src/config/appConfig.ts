@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 /**
  * Technical identifier title applied across root headers and document metadata boundaries.
  */
