@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { APPLICATION_NAME } from './src/config/appConfig.ts';
 
 export default defineConfig(({ mode }) => {

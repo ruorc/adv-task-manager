@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // === GLOBAL VALIDATION FUNCTIONS ===
+    
+    // Only authenticated users can access the database
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Check: is the current user the creator of the existing document
+    function isCreator() {
+      return resource != null && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Check: is the creator specified in the payload of the document being created (for allow create)
+    function isNewResourceCreator() {
+      return request.resource.data.createdBy == request.auth.uid;
+    }
+
+    // Check: does the user's UID exist in the keys of the assignees map of the current document
+    function isLocalAssignee() {
+      return resource != null && 'assignees' in resource.data && request.auth.uid in resource.data.assignees;
+    }
+
+    // === SAFE DATA ACCESS (NULL-SAFETY) ===
+
+    // Safely fetch board data by its ID
+    function getBoardData(boardId) {
+      let path = /databases/$(database)/documents/boards/$(boardId);
+      return exists(path) ? get(path).data : null;
+    }
+
+    // Safely fetch column data by its ID
+    function getColumnData(columnId) {
+      let path = /databases/$(database)/documents/columns/$(columnId);
+      return exists(path) ? get(path).data : null;
+    }
+
+    // Check local access to a board (only the creator or a direct assignee of the board)
+    function hasBoardAccess(boardId) {
+      let board = getBoardData(boardId);
+      return board != null && (board.createdBy == request.auth.uid || request.auth.uid in board.assignees);
+    }
+
+    // Check local access to a column (only the creator or a direct assignee of the column)
+    function hasColumnAccess(columnId) {
+      let column = getColumnData(columnId);
+      return column != null && (column.createdBy == request.auth.uid || request.auth.uid in column.assignees);
+    }
+
+    // === RULES FOR COLLECTIONS ===
+
+    // Users
+    match /users/{userId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Boards
+    match /boards/{boardId} {
+      allow get: if isSignedIn(); // Open read access for all authenticated users
+      allow list: if isSignedIn() && (isCreator() || isLocalAssignee()); // Listing allowed only for the creator and assignees
+      allow delete: if isSignedIn() && isCreator(); // Only the creator can delete
+      allow create: if isSignedIn() && isNewResourceCreator(); // Only the creator can create
+      allow update: if isSignedIn() && (isCreator() || isLocalAssignee()); // Editable by the creator and assignees
+    }
+
+    // Columns
+    match /columns/{columnId} {
+      allow get: if isSignedIn(); // Open read access for all authenticated users
+      allow list: if isSignedIn() && (isCreator() || isLocalAssignee()); // Listing allowed only for the creator and assignees
+      allow delete: if isSignedIn() && isCreator(); // Only the creator can delete
+      allow create: if isSignedIn() && isNewResourceCreator(); // Only the creator can create
+      
+      allow update: if isSignedIn() && (
+        // Scenario 1: Normal editing (parent board does not change)
+        (resource.data.parent == request.resource.data.parent && (isCreator() || isLocalAssignee())) ||
+        
+        // Scenario 2: Moving a column to another board (or resetting it to null)
+        (resource.data.parent != request.resource.data.parent && (
+          // Move permissions: current user must be the creator or an assignee of the column itself
+          (isCreator() || isLocalAssignee()) && 
+          // Check old location: if the column was attached, check local access to the old board
+          (resource.data.parent == null || hasBoardAccess(resource.data.parent)) && 
+          // Check new location: if the column is being attached to a board, check local access to the new board
+          (request.resource.data.parent == null || hasBoardAccess(request.resource.data.parent))
+        ))
+      );
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if isSignedIn(); // Open read access for all authenticated users
+      allow delete: if isSignedIn() && isCreator(); // Only the creator can delete
+      allow create: if isSignedIn() && isNewResourceCreator(); // Only the creator can create
+      
+      allow update: if isSignedIn() && (
+        // Scenario 1: Normal editing (parent/grand relationships do not change)
+        (resource.data.parent == request.resource.data.parent && resource.data.grand == request.resource.data.grand && (
+          isCreator() || isLocalAssignee()
+        )) ||
+        
+        // Scenario 2: Drag-and-Drop (moving a task)
+        ((resource.data.parent != request.resource.data.parent || resource.data.grand != request.resource.data.grand) && (
+          // Who moves it: only the creator or an assignee of the task itself
+          (isCreator() || isLocalAssignee()) && 
+          
+          // FROM WHERE WE TAKE IT (Check old connections, if they were not null)
+          (resource.data.parent == null || hasColumnAccess(resource.data.parent)) && 
+          (resource.data.grand == null || hasBoardAccess(resource.data.grand)) &&
+          
+          // WHERE WE PUT IT (Check new connections, if they are not null)
+          (request.resource.data.parent == null || hasColumnAccess(request.resource.data.parent)) && 
+          (request.resource.data.grand == null || hasBoardAccess(request.resource.data.grand))
+        ))
+      );
+    }
+  }
+}
