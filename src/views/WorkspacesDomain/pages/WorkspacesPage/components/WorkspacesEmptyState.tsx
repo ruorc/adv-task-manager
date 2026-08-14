@@ -2,12 +2,12 @@ import { type JSX } from 'react';
 import { Box, Card, CardContent, Typography } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-import type { BoardFilterMode } from '../../../types/workspaceTypes';
+import type { BoardFilterModeType } from '../../../types/workspaceTypes';
 
 /** Structural blueprint defining the reactive parameters required to render the layout placeholder. */
 interface WorkspacesEmptyStateProps {
   /** The specific query parameters or selection state currently limiting the board list. */
-  readonly currentFilter: BoardFilterMode;
+  readonly currentFilter: BoardFilterModeType;
 }
 
 /** Placeholder component displaying a fallback communication box when no board records are available. */

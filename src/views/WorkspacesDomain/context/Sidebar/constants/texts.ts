@@ -19,4 +19,4 @@ export const UI_TEXTS = Object.freeze({
   CONFIRM_BTN: 'Delete',
   CANCEL_BTN: 'Cancel',
   FALLBACK_ENTITY_TITLE: 'Current Entity',
-} as const);
+});

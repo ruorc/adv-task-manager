@@ -71,8 +71,11 @@ export interface ReadonlyKanbanForm extends KanbanCreatePayload {
 
 /** Specialized validation shape representing mutable form inputs where relation metrics are collected into basic string arrays. */
 export interface KanbanFormState extends Omit<ReadonlyKanbanForm, 'assignees'> {
-  /** Roster tracking target unique identification keys of selected team workers. */
-  readonly assignees: string[];
+  /**
+   * Roster tracking target unique identification keys of selected team workers along with names.
+   * Matches the presentation-friendly multi-selection tuple sequence utilized within client UI states.
+   */
+  readonly assignees: [string, string][];
 }
 
 /** Universal layout and orchestration configuration blueprint controlling top-level dialog wrapper scopes. */

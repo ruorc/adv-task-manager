@@ -58,6 +58,7 @@ export const getRouterConfig = (
       },
       {
         path: ROUTES.WORKSPACES,
+        loader: workspacesDomainLoader(queryClient, getCurrentUserUid),
         lazy: async () => {
           const { WorkspacesLayout } =
             await import('@/views/WorkspacesDomain/WorkspacesLayout');
@@ -74,7 +75,6 @@ export const getRouterConfig = (
         children: [
           {
             index: true,
-            loader: workspacesDomainLoader(queryClient, getCurrentUserUid),
             lazy: async () => {
               const { WorkspacesPage } =
                 await import('@/views/WorkspacesDomain/pages/WorkspacesPage');

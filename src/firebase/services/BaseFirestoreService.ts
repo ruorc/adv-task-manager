@@ -6,14 +6,16 @@ import {
   deleteDoc,
   collection,
   query,
-  where,
   getDocs,
-  type QueryConstraint,
   type FirestoreDataConverter,
 } from 'firebase/firestore';
+
 import { db } from '@/firebase/config';
-import { handleFirestoreError } from './firestoreErrorHandler';
-import { createFirestoreConverter } from './firestoreConverterFactory';
+import { handleFirestoreError } from '../utils/firestoreErrorHandler';
+import { createFirestoreConverter } from '../utils/firestoreConverterFactory';
+import { prepareFirestorePatch } from '../utils/firestorePatchUtils';
+import { buildFirestoreQuery } from '../utils/firestoreQueryBuilder';
+
 import type {
   BaseServiceLogger,
   CollectionQueryParams,
@@ -22,6 +24,8 @@ import type {
 
 /**
  * Abstract domain controller providing standard operational blueprints for individual collections.
+ * Establishes core data orchestration boundaries, handles data converters, executes basic CRUD logic,
+ * and delegates business mutations down to specific entity subclasses.
  */
 export abstract class BaseFirestoreService<T extends { uid: string }> {
   /** Root database path tracking coordinates. */
@@ -30,12 +34,25 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
   /** Active validation parameters safeguarding runtime mutations. */
   protected abstract schema: JoiSchemaValidator<T>;
 
+  /**
+   * Checks if the incoming form payload has actual changes compared to the database snapshot.
+   * Compares the persistent node snapshot against the submitted configuration block to look for adjustments.
+   */
+  protected abstract hasChanges(current: T, incoming: Partial<T>): boolean;
+
+  /**
+   * Enforces domain-specific default flags and layout resets upon mutations.
+   * Sanitizes entity payloads during creation or structural updates, guaranteeing proper initial states.
+   */
+  protected abstract enforceDefaultFlags(payload: Partial<T>): Partial<T>;
+
   /** Active downstream telemetry targets. */
   protected logger: BaseServiceLogger;
 
   /**
    * Builds instances ensuring fallback log strategies handle runtime gaps safely.
-   * Takes a telemetry destination logger object. Falls back to console when undefined.
+   * Takes an optional telemetry destination logger object and falls back to a
+   * standard console logger configuration when undefined.
    */
   constructor(logger?: BaseServiceLogger) {
     this.logger = logger || {
@@ -48,6 +65,8 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
 
   /**
    * Evaluates active translation adapters maps for local tracking.
+   * Configures the shared converter blueprint bound to the active collection name,
+   * validation schema, and telemetry logger instance.
    */
   protected get converter(): FirestoreDataConverter<T> {
     return createFirestoreConverter(
@@ -58,30 +77,10 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
   }
 
   /**
-   * Evaluates payloads against registered validation rules under specified transaction contexts.
-   */
-  private validatePayload(payload: unknown, stage: 'create' | 'save'): T {
-    const { error, value } = this.schema.validate(payload, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
-      const errorMessages = error.details.map((d) => d.message).join(', ');
-
-      this.logger.error(
-        `Validation failed before operational step [${stage}] inside [${this.collectionName}]`,
-        new Error(errorMessages)
-      );
-
-      throw new Error(`Invalid payload structure: ${errorMessages}`);
-    }
-
-    return value as T;
-  }
-
-  /**
    * Retrieves structural instances identified by target domain credentials primary key value.
+   * Requests a specific document by its unique identity string, applies the automated
+   * converter layer, and returns the presentation-ready mapped model, or null if the
+   * document does not exist or has been soft-deleted.
    */
   public async getById(uid: string): Promise<T | null> {
     const docRef = doc(db, this.collectionName, uid).withConverter(
@@ -91,7 +90,13 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
     try {
       const snapshot = await getDoc(docRef);
 
-      return snapshot.exists() ? snapshot.data() : null;
+      if (!snapshot.exists()) return null;
+
+      const data = snapshot.data();
+
+      return (data as unknown as Record<string, unknown>).isDeleted === true
+        ? null
+        : data;
     } catch (error) {
       handleFirestoreError(
         this.collectionName,
@@ -100,36 +105,19 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
         this.logger,
         uid
       );
+
+      return null;
     }
   }
 
   /**
    * Collects structural domain instances conforming to runtime evaluation filters config structures.
-   * Falls back to full collection retrieval when inputs evaluate missing.
+   * Delegates the passed query parameters to the centralized builder utility to assembly database
+   * constraints, returning an array of fully hydrated, active application models.
    */
   public async getMany(queryParams?: CollectionQueryParams): Promise<T[]> {
     try {
-      const constraints: QueryConstraint[] = [];
-
-      if (queryParams) {
-        const { filters, search } = queryParams;
-
-        if (filters) {
-          Object.entries(filters).forEach(([field, value]) => {
-            if (value !== undefined) {
-              constraints.push(where(field, '==', value));
-            }
-          });
-        }
-
-        if (search && search.value.trim() !== '') {
-          const { field, value } = search;
-
-          constraints.push(where(field, '>=', value));
-          constraints.push(where(field, '<=', value + '\uf8ff'));
-        }
-      }
-
+      const constraints = buildFirestoreQuery(queryParams);
       const collectionRef = collection(db, this.collectionName).withConverter(
         this.converter
       );
@@ -139,54 +127,53 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
       return querySnapshot.docs.map((docSnapshot) => docSnapshot.data());
     } catch (error) {
       handleFirestoreError(this.collectionName, 'getMany', error, this.logger);
+
+      return [];
     }
   }
 
   /**
    * Generates a new unique identifier in Firestore, inserts it into the payload,
-   * validates the structured object, and persists it as a new document.
-   * Takes the raw data payload omitting the unique identifier.
+   * enforces standard lifecyle initialization flags, and persists it as a new document.
+   * Receives a raw input data payload, binds a unique reference ID string, passes state mutations
+   * to default rule builders, and returns the resulting mapped entity.
    */
-  public async create(rawPayload: unknown): Promise<T> {
-    const collectionRef = collection(db, this.collectionName);
-    const newDocRef = doc(collectionRef);
-    const generatedUid = newDocRef.id;
-
-    const payloadWithUid =
-      typeof rawPayload === 'object' && rawPayload !== null
-        ? { ...rawPayload, uid: generatedUid }
-        : { uid: generatedUid };
-
-    /** Execute the isolated validator module which now expects uid to be present and required */
-    const validatedData = this.validatePayload(payloadWithUid, 'create');
-    const docRefWithConverter = newDocRef.withConverter(this.converter);
+  public async create(rawPayload: Partial<T>): Promise<T | undefined> {
+    const newDocRef = doc(collection(db, this.collectionName)).withConverter(
+      this.converter
+    );
+    const initialPayload = { ...rawPayload, uid: newDocRef.id };
+    const payload = this.enforceDefaultFlags(initialPayload) as T;
 
     try {
-      await setDoc(docRefWithConverter, validatedData);
+      await setDoc(newDocRef, payload);
 
-      return validatedData;
+      return payload;
     } catch (firestoreError) {
       handleFirestoreError(
         this.collectionName,
         'create',
         firestoreError,
         this.logger,
-        generatedUid
+        newDocRef.id
       );
+
+      return undefined;
     }
   }
 
   /**
    * Commits structural values validating state boundaries before operational transactions execute.
-   * Strictly requires a valid identifier mapping to be provided or extracted.
-   * Throws an error immediately if the identifier cannot be resolved.
+   * Resolves the target key string, evaluates modifications against the current remote document
+   * snapshot to skip redundant updates, resets lifecycle indicators, and updates the database node.
    */
-  public async save(rawPayload: unknown, customUid?: string): Promise<T> {
-    /** Execute the isolated validator module checking existing records fields integrity */
-    const validatedData = this.validatePayload(rawPayload, 'save');
-    const targetUid = customUid || validatedData.uid;
+  public async save(
+    rawPayload: Partial<T>,
+    customUid?: string
+  ): Promise<T | undefined> {
+    const targetUid = customUid || rawPayload.uid;
 
-    if (!targetUid) {
+    if (typeof targetUid !== 'string' || !targetUid) {
       this.logger.error(
         `Operational error: UID is missing during write in [${this.collectionName}]`
       );
@@ -196,15 +183,25 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
       );
     }
 
-    validatedData.uid = targetUid;
     const docRef = doc(db, this.collectionName, targetUid).withConverter(
       this.converter
     );
 
     try {
-      await setDoc(docRef, validatedData);
+      const currentDoc = await getDoc(docRef);
 
-      return validatedData;
+      if (currentDoc.exists()) {
+        if (!this.hasChanges(currentDoc.data() as T, rawPayload)) {
+          return currentDoc.data();
+        }
+      }
+
+      const initialPayload = { ...rawPayload, uid: targetUid };
+      const payload = this.enforceDefaultFlags(initialPayload) as T;
+
+      await setDoc(docRef, payload);
+
+      return payload;
     } catch (firestoreError) {
       handleFirestoreError(
         this.collectionName,
@@ -213,20 +210,37 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
         this.logger,
         targetUid
       );
+
+      return undefined;
     }
   }
 
   /**
    * Performs granular mutation queries targeting explicit values using a partial subset updates map.
+   * Takes a specific document identification pointer alongside partial payload updates, compares changes
+   * to bypass network operations on dead payloads, and routes normalized structures into direct document mutations.
    */
   public async update(
     uid: string,
     updates: Partial<Omit<T, 'uid'>>
   ): Promise<void> {
-    const docRef = doc(db, this.collectionName, uid);
-
     try {
-      await updateDoc(docRef, updates as Record<string, unknown>);
+      const docRef = doc(db, this.collectionName, uid).withConverter(
+        this.converter
+      );
+      const currentDoc = await getDoc(docRef);
+
+      if (!currentDoc.exists()) return;
+
+      if (!this.hasChanges(currentDoc.data() as T, updates as Partial<T>))
+        return;
+
+      const patch = this.enforceDefaultFlags(updates as Partial<T>);
+      const normalizedPatch = prepareFirestorePatch(
+        patch as Record<string, unknown>
+      );
+
+      await updateDoc(doc(db, this.collectionName, uid), normalizedPatch);
     } catch (error) {
       handleFirestoreError(
         this.collectionName,
@@ -240,7 +254,8 @@ export abstract class BaseFirestoreService<T extends { uid: string }> {
 
   /**
    * Disposes of structural entities by targeted data element uid pointer.
-   * Applies soft flag logic by default unless hardDelete execution path configuration is passed.
+   * Resolves the target database coordinates using an explicit identification key, switching
+   * between immediate document removal or setting a passive soft archive flag based on options config.
    */
   public async delete(
     uid: string,

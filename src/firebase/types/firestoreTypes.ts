@@ -36,6 +36,22 @@ export interface CollectionQueryParams {
 }
 
 /**
+ * Extended type blueprint capturing entity signatures that contain assignees data properties.
+ * Facilitates fluid structure mutations across array presentation layers and object storage contexts.
+ */
+export type EntityWithAssignees = {
+  /** The structural unique identifier driving identity mapping operations. */
+  uid: string;
+  /**
+   * The multi-selection tracking map storing referenced target contextual boundaries.
+   * Keeps a dynamic list layout on screens but saves down as key-value pairings within collections.
+   */
+  assignees: Record<string, string> | [string, string][];
+  /** Wildcard anchor allowing open structural properties to map seamlessly without compilation blocks. */
+  [key: string]: unknown;
+};
+
+/**
  * Detailed container tracking a single structural validation error
  * pinpointed by the schema evaluator.
  */

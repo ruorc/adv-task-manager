@@ -11,46 +11,62 @@ import {
  * Configuration schema defining the state operational metadata for active dialog views.
  */
 interface ModalConfig {
+  /** Conditional flag determining whether the dialog container is actively rendered. */
+  readonly isOpen: boolean;
   /** The operational workflow state, managing creation or modification. */
-  mode: FormModeType;
+  readonly mode: FormModeType;
   /** The target architectural classification of the active system entity. */
-  entityType: EntityType;
+  readonly entityType: EntityType;
 }
 
 /**
  * Custom React hook that coordinates modal visibility state and structural configurations for entity workflows.
  */
 export const useSidebarModal = () => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [modalConfig, setModalConfig] = useState<ModalConfig>({
+  const [modalState, setModalState] = useState<ModalConfig>({
+    isOpen: false,
     mode: FormMode.CREATE,
     entityType: EntityName.BOARD,
   });
 
-  const openCreateModal = useCallback((entityType: EntityType) => {
-    setModalConfig({
-      mode: FormMode.CREATE,
-      entityType,
-    });
-    setIsModalOpen(true);
-  }, []);
+  const openModal = useCallback(
+    (mode: FormModeType, entityType: EntityType) => {
+      setModalState({
+        isOpen: true,
+        mode,
+        entityType,
+      });
+    },
+    []
+  );
 
-  const openEditModal = useCallback((entityType: EntityType) => {
-    setModalConfig({
-      mode: FormMode.EDIT,
-      entityType,
-    });
-    setIsModalOpen(true);
-  }, []);
+  const openCreateModal = useCallback(
+    (entityType: EntityType) => {
+      openModal(FormMode.CREATE, entityType);
+    },
+    [openModal]
+  );
+
+  const openEditModal = useCallback(
+    (entityType: EntityType) => {
+      openModal(FormMode.EDIT, entityType);
+    },
+    [openModal]
+  );
 
   const closeModal = useCallback(() => {
-    setIsModalOpen(false);
+    setModalState((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
   }, []);
 
   return {
-    isModalOpen,
-    modalConfig,
+    isModalOpen: modalState.isOpen,
+    modalConfig: {
+      mode: modalState.mode,
+      entityType: modalState.entityType,
+    },
     openCreateModal,
     openEditModal,
     closeModal,

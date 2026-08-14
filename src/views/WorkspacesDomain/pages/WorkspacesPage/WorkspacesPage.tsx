@@ -9,7 +9,7 @@ import { WorkspacesEmptyState } from './components/WorkspacesEmptyState';
 import { WorkspacesGrid } from './components/WorkspacesGrid';
 
 import { DataLifecycleWrapper } from '../shared/DataLifecycleWrapper';
-import type { BoardFilterMode } from '../../types/workspaceTypes';
+import type { BoardFilterModeType } from '../../types/workspaceTypes';
 import { routeHelpers } from '@/routes';
 
 /**
@@ -21,10 +21,11 @@ export const WorkspacesPage = (): JSX.Element => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const currentFilter =
-    (searchParams.get('filter') as BoardFilterMode) || 'ALL';
+    (searchParams.get('filter') as BoardFilterModeType) || 'ALL';
 
+  // 🛠️ Restored direct destructuring layout natively synchronized with the updated useBoardsWorkflow return schema
   const {
-    data: boards = {},
+    data: boards = [],
     isLoading,
     isError,
   } = useBoardsWorkflow(userUid, currentFilter);
@@ -33,7 +34,7 @@ export const WorkspacesPage = (): JSX.Element => {
     navigate(routeHelpers.boardDetail(uid));
   };
 
-  const hasNoBoards = Object.keys(boards).length === 0;
+  const hasNoBoards = boards.length === 0;
 
   return (
     <Box sx={{ p: 3 }}>

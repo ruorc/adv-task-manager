@@ -9,6 +9,7 @@ import { firestoreBoardService } from '@/firebase/services/FirestoreBoardService
 export const getBoardsQueryConfig = (userUid: string) => ({
   queryKey: ['boards', 'raw-list', userUid],
   queryFn: () => firestoreBoardService.getAllActiveBoards(),
+  staleTime: 5 * 60 * 1000,
 });
 
 /**

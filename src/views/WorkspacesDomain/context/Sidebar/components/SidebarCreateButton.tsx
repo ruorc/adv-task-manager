@@ -1,4 +1,4 @@
-import { type JSX, type ReactNode } from 'react';
+import { type JSX } from 'react';
 import Button from '@mui/material/Button';
 
 /**
@@ -6,13 +6,13 @@ import Button from '@mui/material/Button';
  */
 interface SidebarCreateButtonProps {
   /** The human-readable text label displayed inside the action button. */
-  label: string;
+  readonly label: string;
   /** Graphic visual symbol or component rendered prior to the label text. */
-  icon: ReactNode;
+  readonly icon: JSX.Element;
   /** Material UI semantic theme intent variant controlling background colors. */
-  color: 'primary' | 'secondary' | 'success';
+  readonly color: 'primary' | 'secondary' | 'success';
   /** Callback trigger invoked when the interactive layout element is clicked. */
-  onClick: () => void;
+  readonly onClick: () => void;
 }
 
 /**
@@ -29,6 +29,8 @@ export const SidebarCreateButton = ({
       variant="contained"
       color={color}
       startIcon={icon}
+      fullWidth
+      aria-label={`Create new ${label.toLowerCase()}`}
       sx={{ justifyContent: 'flex-start' }}
       onClick={onClick}
     >

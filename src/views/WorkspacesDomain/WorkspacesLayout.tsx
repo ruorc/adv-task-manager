@@ -14,13 +14,8 @@ import { SIDEBAR_WIDTH } from './constants/constants';
  */
 export const WorkspacesLayout = (): JSX.Element => {
   const theme = useTheme();
-  /** Responsive breakpoint matcher checking if the viewport matches mobile/tablet screen metrics */
   const isMobileScreen = useMediaQuery(theme.breakpoints.down('md'));
-
-  /** Reactive state flag managing temporary mobile drawer visibility */
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
-
-  /** Command handler toggling the open/close state of the mobile navigation drawer */
   const handleMobileDrawerToggle = (): void => {
     setIsMobileDrawerOpen((prev) => !prev);
   };
@@ -35,51 +30,40 @@ export const WorkspacesLayout = (): JSX.Element => {
         alignItems: 'stretch',
       }}
     >
-      {isMobileScreen ? (
-        <Drawer
-          component="aside"
-          slotProps={{ backdrop: { 'aria-hidden': true } }}
-          aria-label="Workspaces domain mobile sidebar navigation"
-          variant="temporary"
-          open={isMobileDrawerOpen}
-          onClose={handleMobileDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              width: SIDEBAR_WIDTH,
-              boxSizing: 'border-box',
-              bgcolor: 'background.paper',
-            },
-          }}
-        >
-          <WorkspacesSidebar />
-        </Drawer>
-      ) : (
-        <Drawer
-          component="aside"
-          aria-label="Workspaces domain permanent sidebar navigation"
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
+      <Drawer
+        component="aside"
+        variant={isMobileScreen ? 'temporary' : 'permanent'}
+        open={isMobileScreen ? isMobileDrawerOpen : undefined}
+        onClose={isMobileScreen ? handleMobileDrawerToggle : undefined}
+        slotProps={
+          isMobileScreen ? { backdrop: { 'aria-hidden': true } } : undefined
+        }
+        ModalProps={isMobileScreen ? { keepMounted: true } : undefined}
+        aria-label={
+          isMobileScreen
+            ? 'Workspaces domain mobile sidebar navigation'
+            : 'Workspaces domain permanent sidebar navigation'
+        }
+        sx={{
+          display: isMobileScreen
+            ? { xs: 'block', md: 'none' }
+            : { xs: 'none', md: 'block' },
+          width: SIDEBAR_WIDTH,
+          flexShrink: isMobileScreen ? undefined : 0,
+          '& .MuiDrawer-paper': {
             width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: SIDEBAR_WIDTH,
-              boxSizing: 'border-box',
-              position: 'sticky',
-              top: 0,
-              height: '100vh',
-              borderRight: '1px solid',
-              borderColor: 'divider',
-            },
-          }}
-        >
-          <WorkspacesSidebar />
-        </Drawer>
-      )}
+            boxSizing: 'border-box',
+            bgcolor: 'background.paper',
+            position: isMobileScreen ? undefined : 'sticky',
+            top: isMobileScreen ? undefined : 0,
+            height: isMobileScreen ? undefined : '100vh',
+            borderRight: isMobileScreen ? undefined : '1px solid',
+            borderColor: isMobileScreen ? undefined : 'divider',
+          },
+        }}
+      >
+        <WorkspacesSidebar />
+      </Drawer>
 
       <Box
         sx={{

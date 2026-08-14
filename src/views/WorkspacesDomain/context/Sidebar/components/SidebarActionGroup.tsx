@@ -11,11 +11,11 @@ import { UI_TEXTS } from '../constants/texts';
  */
 interface SidebarActionGroupProps {
   /** Conditional flag determining whether the operation actions are rendered in the layout. */
-  isVisible: boolean;
+  readonly isVisible: boolean;
   /** Callback trigger invoked when requesting modification workflows for the active entity. */
-  onEdit: () => void;
+  readonly onEdit: () => void;
   /** Callback trigger invoked when requesting structural deletion pipelines for the active entity. */
-  onDelete: () => void;
+  readonly onDelete: () => void;
 }
 
 /**
@@ -29,13 +29,14 @@ export const SidebarActionGroup = ({
   if (!isVisible) return null;
 
   return (
-    <Stack direction="row" spacing={1} sx={{ pl: 2 }}>
+    <Stack direction="row" spacing={1} sx={{ pl: 2, width: '100%' }}>
       <Button
         size="small"
         startIcon={<EditIcon />}
         color="inherit"
-        fullWidth
+        aria-label="Edit current workspace entity property values"
         onClick={onEdit}
+        sx={{ flexGrow: 1 }}
       >
         {UI_TEXTS.EDIT}
       </Button>
@@ -43,8 +44,9 @@ export const SidebarActionGroup = ({
         size="small"
         startIcon={<DeleteIcon />}
         color="error"
-        fullWidth
+        aria-label="Delete current workspace entity resource from registry"
         onClick={onDelete}
+        sx={{ flexGrow: 1 }}
       >
         {UI_TEXTS.DELETE}
       </Button>

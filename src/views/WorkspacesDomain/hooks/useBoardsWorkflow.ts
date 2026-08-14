@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getBoardsQueryConfig } from '@/utils/loader';
 
 import type { AppKanbanEntities } from '@/types/appKanbanTypes';
-import type { BoardFilterMode } from '../types/workspaceTypes';
+import type { BoardFilterModeType, BoardItem } from '../types/workspaceTypes';
 
 /**
  * Custom hook managing the state of board collections with client-side filter projections.
@@ -10,7 +10,7 @@ import type { BoardFilterMode } from '../types/workspaceTypes';
  */
 export const useBoardsWorkflow = (
   userUid: string,
-  filterMode: BoardFilterMode = 'ALL'
+  filterMode: BoardFilterModeType = 'ALL'
 ) => {
   const baseConfig = getBoardsQueryConfig(userUid);
 
@@ -32,13 +32,12 @@ export const useBoardsWorkflow = (
         return true;
       });
 
-      return filtered.reduce<Record<string, string>>((acc, board) => {
-        if (board.uid && board.title) {
-          acc[board.uid] = board.title;
-        }
-
-        return acc;
-      }, {});
+      return filtered
+        .filter((board) => Boolean(board.uid && board.title))
+        .map((board) => ({
+          uid: board.uid!,
+          title: board.title!,
+        })) as readonly BoardItem[];
     },
   });
 };

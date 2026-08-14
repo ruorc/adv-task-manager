@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 /**
  * Pure runtime blueprint serving as the single source of truth for Kanban entity fields.
+ * Contains configuration configurations validated exclusively on the client form layout tier.
  */
 export const kanbanFieldsValidation = {
   title: Joi.string().trim().min(3).max(100).messages({
@@ -15,26 +16,24 @@ export const kanbanFieldsValidation = {
     'string.max': 'Description must be under 500 characters.',
   }),
 
+  /**
+   * Validates the presentation-friendly array of tuples for form states.
+   * Expects a structure matching an array of sub-arrays, where each nested
+   * block contains exactly two string elements tracking user identity configurations.
+   * Falls back to an empty collection layout if no records are selected by the user.
+   */
   assignees: Joi.array()
-    .items(Joi.string().trim())
+    .items(
+      Joi.array()
+        .ordered(Joi.string().trim().required(), Joi.string().trim().required())
+        .length(2)
+    )
     .min(0)
     .default([])
     .messages({
       'array.base':
-        'Assignees structural data must be a valid collection of user identifiers.',
+        'Assignees structural data must be a valid array of identity tuples.',
     }),
-
-  createdBy: Joi.string().trim().messages({
-    'string.empty': 'Creator unique identifier cannot be empty.',
-  }),
-
-  createdByName: Joi.string().trim().messages({
-    'string.empty': 'Creator display name cannot be empty.',
-  }),
-
-  isCompleted: Joi.boolean(),
-
-  isDeleted: Joi.boolean(),
 
   parent: Joi.string().trim().allow(null).optional().messages({
     'string.base': 'Parent must be a valid identifier or unassigned.',

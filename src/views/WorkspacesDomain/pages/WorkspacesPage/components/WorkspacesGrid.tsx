@@ -4,22 +4,14 @@ import { Typography } from '@mui/material';
 import { EntityDashboardGrid } from '../../shared/EntityDashboardGrid';
 import { BaseInteractiveCard } from '../../shared/BaseInteractiveCard';
 
-/**
- * Type construction extracting dictionary records into strict key-value sequence pairs.
- */
-interface BoardItem {
-  /** The targeted unique core database key mapping to the dashboard structure. */
-  readonly uid: string;
-  /** The visual description identifier assigned to the target data board. */
-  readonly title: string;
-}
+import type { BoardItem } from '@/views/WorkspacesDomain/types/workspaceTypes';
 
 /**
  * Structural blueprint defining the grid database collections necessary to display available workspaces.
  */
 interface WorkspacesGridProps {
-  /** Directory mapping containing targeted unique identification keys to their respective descriptive titles. */
-  readonly boards: Record<string, string>;
+  /** Array containing targeted board items representing accessible workspaces. */
+  readonly boards: readonly BoardItem[];
   /** Reactive callback dispatcher tracking user target selections when a card matrix element is clicked. */
   readonly onBoardSelect: (
     /** The targeted unique core database key mapping to the clicked dashboard structure. */
@@ -34,16 +26,9 @@ export const WorkspacesGrid = ({
   boards,
   onBoardSelect,
 }: WorkspacesGridProps): JSX.Element => {
-  const boardItems: readonly BoardItem[] = Object.entries(boards).map(
-    ([uid, title]) => ({
-      uid,
-      title,
-    })
-  );
-
   return (
     <EntityDashboardGrid
-      items={boardItems}
+      items={boards}
       renderItem={({ uid, title }) => (
         <BaseInteractiveCard key={uid} onClick={() => onBoardSelect(uid)}>
           <Typography variant="h6" component="h3">

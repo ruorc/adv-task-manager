@@ -1,13 +1,13 @@
 import { type JSX } from 'react';
 import { Tabs, Tab } from '@mui/material';
-import type { BoardFilterMode } from '../../../types/workspaceTypes';
+import type { BoardFilterModeType } from '../../../types/workspaceTypes';
 
 /**
  * Configuration blueprint regulating a single layout view selector tab element.
  */
 interface FilterTabConfig {
   /** The targeted unique evaluation string applied during array lookup modifications. */
-  readonly value: BoardFilterMode;
+  readonly value: BoardFilterModeType;
   /** The visual localized descriptor displayed directly onto the component interface. */
   readonly label: string;
 }
@@ -17,11 +17,11 @@ interface FilterTabConfig {
  */
 interface WorkspacesFilterTabsProps {
   /** The active filtering strategy metric determining the selected navigation node state. */
-  readonly currentFilter: BoardFilterMode;
+  readonly currentFilter: BoardFilterModeType;
   /** Reactive callback pipeline triggering parameter updates upon selecting another layout state. */
   readonly onFilterChange: (
     /** The newly designated selection query criteria flag chosen by the system client. */
-    value: BoardFilterMode
+    value: BoardFilterModeType
   ) => void;
 }
 
@@ -43,7 +43,7 @@ export const WorkspacesFilterTabs = ({
 }: WorkspacesFilterTabsProps): JSX.Element => (
   <Tabs
     value={currentFilter}
-    onChange={(_, newValue: BoardFilterMode) => onFilterChange(newValue)}
+    onChange={(_, newValue: BoardFilterModeType) => onFilterChange(newValue)}
     sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
   >
     {FILTER_TABS.map(({ value, label }) => (
